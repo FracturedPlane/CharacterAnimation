@@ -1,0 +1,130 @@
+#ifndef RAGDOLLHIERARCHICAL_H_INCLUDED
+#define RAGDOLLHIERARCHICAL_H_INCLUDED
+
+#include "DemoApplication.h"
+#include "LinearMath/btAlignedObjectArray.h"
+#include "btBulletDynamicsCommon.h"
+#include "BulletDynamics/Featherstone/btMultiBodyDynamicsWorld.h"
+
+
+
+
+class RagDollHierarchical
+{
+public:
+	enum
+	{
+		BODYPART_PELVIS = 0,
+		BODYPART_PELVIS_XY,
+		BODYPART_PELVIS_YZ,
+		BODYPART_SPINE,
+		BODYPART_SPINE_XY,
+		BODYPART_SPINE_YZ,
+		BODYPART_HEAD,
+		BODYPART_HEAD_XY,
+		BODYPART_HEAD_YZ,
+
+		BODYPART_LEFT_UPPER_LEG,
+		BODYPART_LEFT_UPPER_LEG_XY,
+		BODYPART_LEFT_UPPER_LEG_YZ,
+		BODYPART_LEFT_LOWER_LEG,
+		BODYPART_LEFT_FOOT,
+		BODYPART_LEFT_FOOT_XZ,
+
+		BODYPART_RIGHT_UPPER_LEG,
+		BODYPART_RIGHT_UPPER_LEG_XY,
+		BODYPART_RIGHT_UPPER_LEG_YZ,
+		BODYPART_RIGHT_LOWER_LEG,
+		BODYPART_RIGHT_FOOT,
+		BODYPART_RIGHT_FOOT_XZ,
+
+		BODYPART_LEFT_UPPER_ARM,
+		BODYPART_LEFT_UPPER_ARM_XY,
+		BODYPART_LEFT_UPPER_ARM_YZ,
+		BODYPART_LEFT_LOWER_ARM,
+		BODYPART_LEFT_HAND,
+		BODYPART_LEFT_HAND_XY,
+		BODYPART_LEFT_HAND_YZ,
+
+		BODYPART_RIGHT_UPPER_ARM,
+		BODYPART_RIGHT_UPPER_ARM_XY,
+		BODYPART_RIGHT_UPPER_ARM_YZ,
+		BODYPART_RIGHT_LOWER_ARM,
+		BODYPART_RIGHT_HAND,
+		BODYPART_RIGHT_HAND_XY,
+		BODYPART_RIGHT_HAND_YZ,
+
+		BODYPART_COUNT
+	};
+
+	enum
+	{
+		JOINT_ROOT_PELVIS_X = 0,
+		JOINT_ROOT_PELVIS_y ,
+		JOINT_ROOT_PELVIS_Z ,
+		JOINT_PELVIS_SPINE_X ,
+		JOINT_PELVIS_SPINE_Y,
+		JOINT_PELVIS_SPINE_Z,
+		JOINT_SPINE_HEAD_X,
+		JOINT_SPINE_HEAD_Y,
+		JOINT_SPINE_HEAD_Z,
+
+		JOINT_LEFT_HIP_X,
+		JOINT_LEFT_HIP_Y,
+		JOINT_LEFT_HIP_Z,
+		JOINT_LEFT_KNEE_X,
+		JOINT_LEFT_ANKLE_X,
+		JOINT_LEFT_ANKLE_Z,
+
+		JOINT_RIGHT_HIP_X,
+		JOINT_RIGHT_HIP_Y,
+		JOINT_RIGHT_HIP_Z,
+		JOINT_RIGHT_KNEE_X,
+		JOINT_RIGHT_ANKLE_X,
+		JOINT_RIGHT_ANKLE_Z,
+
+
+		JOINT_LEFT_SHOULDER_X,
+		JOINT_LEFT_SHOULDER_Y,
+		JOINT_LEFT_SHOULDER_Z,
+		JOINT_LEFT_ELBOW_Z,
+		JOINT_LEFT_WRIST_X,
+		JOINT_LEFT_WRIST_Y,
+		JOINT_LEFT_WRIST_Z,
+
+
+		JOINT_RIGHT_SHOULDER_X,
+		JOINT_RIGHT_SHOULDER_Y,
+		JOINT_RIGHT_SHOULDER_Z,
+		JOINT_RIGHT_ELBOW_Z,
+		JOINT_RIGHT_WRIST_x,
+		JOINT_RIGHT_WRIST_Y,
+		JOINT_RIGHT_WRIST_Z,
+
+		JOINT_COUNT
+	};
+
+	btMultiBodyDynamicsWorld* m_ownerWorld;
+	btCollisionShape* m_shapes[BODYPART_COUNT];
+	btRigidBody* m_bodies[BODYPART_COUNT];
+	btTypedConstraint* m_joints[JOINT_COUNT];
+	btAlignedObjectArray<btQuaternion> m_world_to_local;
+	btAlignedObjectArray<btVector3> m_local_to_origin;
+
+	btMultiBody * bod;
+
+	btRigidBody* localCreateRigidBody (btScalar mass, const btTransform& startTransform, btCollisionShape* shape);
+
+public:
+	RagDollHierarchical (class btMultiBodyDynamicsWorld* world,
+				const btVector3& positionOffset,
+				btScalar scale_ragdoll = btScalar(1.0));
+
+	btTypedConstraint** GetJoints() {return &m_joints[0];}
+
+	~RagDollHierarchical ();
+};
+
+
+
+#endif // RAGDOLLHIERARCHICAL_H_INCLUDED
