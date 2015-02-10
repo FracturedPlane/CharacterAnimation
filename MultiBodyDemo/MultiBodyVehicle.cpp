@@ -23,7 +23,8 @@ const int NUM_MULTIBODIES = 1;
 
 btVector3 flipYandZ(const btVector3 & v)
 {
-  return btVector3(v.getX(), v.getZ(), v.getY());
+	return btVector3(v.getX(), v.getZ(), v.getY());
+	// return btVector3(v.getX(), v.getY(), v.getZ());
 }
 
 bool Comparator::operator()(const btVector3 & u, const btVector3 & v) const
@@ -105,7 +106,9 @@ class btMultiBody* MultiBodyVehicleSetup::createMultiBodyVehicle(const ModelCons
   for (int i = 0; i < NUM_LINKS; i++)
   {
     const BodyConstructionInfo & LINK = info.childLinks.at(i);
-    btCollisionShape * collisionShape = getBoxShape(LINK.halfExtents);
+    // btCollisionShape * collisionShape = getBoxShape(LINK.halfExtents);
+    btCollisionShape * collisionShape = new btBoxShape(LINK.halfExtents);
+    std::cout << "collision shape: " << *LINK.halfExtents << std::endl;
     // gfxBridge.createCollisionShapeGraphicsObject(collisionShape);
     this->colliders.push_back(new btMultiBodyLinkCollider(multiBody,
           i));
@@ -507,6 +510,21 @@ void MultiBodyVehicleSetup::initPhysics(GraphicsPhysicsBridge& gfxBridge)
         curColor&=3;
         gfxBridge.createRigidBodyGraphicsObject(body,color);
     }
+
+    btVector4 color = colors[curColor];
+    gfxBridge.createCollisionShapeGraphicsObject(m_multiBody->getBaseCollider()->getCollisionShape());
+    gfxBridge.createCollisionObjectGraphicsObject(m_multiBody->getBaseCollider(),color);
+    curColor++;
+	curColor&=3;
+    for (size_t link=0; link < m_multiBody->getNumLinks(); link++)
+    {
+    	btVector4 color = colors[curColor];
+		curColor++;
+		curColor&=3;
+    	gfxBridge.createCollisionShapeGraphicsObject(m_multiBody->getLink(link).m_collider->getCollisionShape());
+    	gfxBridge.createCollisionObjectGraphicsObject(m_multiBody->getLink(link).m_collider,color);
+    }
+
 
 }
 
