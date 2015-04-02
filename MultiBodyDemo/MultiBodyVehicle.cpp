@@ -552,8 +552,8 @@ void MultiBodyVehicleSetup::stepSimulation(float deltaTime)
       //m_dynamicsWorld->stepSimulation(deltaTime);
       // std::cout << "MultiBody: " << m_multiBody << " delta time:  " << deltaTime << std::endl;
       // m_multiBody->
-      float kp = 265.0f;
-      float kd = 140.5f;
+      float kp = 5.0f;
+      float kd = 1.5f;
       float desiredAngle = 0.2f;
       size_t joint=2;
       float torqueLimit = 60.0;
@@ -567,8 +567,9 @@ void MultiBodyVehicleSetup::stepSimulation(float deltaTime)
     	  float angleCurrent = angleQ.getAngle();
     	  // std::cout << "Angle for joint " << joint << " is " << angleCurrent << std::endl;
     	  // btVector3 getAngularMomentum()
-    	  float errorDerivative =  ((angleCurrent - desiredAngle) - (this->config[joint] - desiredAngle))/deltaTime;
-    	  float appliedTourque = (kp * (angleCurrent - desiredAngle)) + (kd * (errorDerivative));
+    	  float errorDerivative =  kd * (((angleCurrent - desiredAngle)) - (this->config[joint] - desiredAngle));
+    	  float errorDifference =  (kp * ((angleCurrent - desiredAngle)));
+    	  float appliedTourque = -((errorDifference)) + ((errorDerivative));
     	  if (appliedTourque > torqueLimit )
     	  {
     		  appliedTourque = torqueLimit;
@@ -578,7 +579,8 @@ void MultiBodyVehicleSetup::stepSimulation(float deltaTime)
 			  appliedTourque = -torqueLimit;
 		  }
     	  m_multiBody->addJointTorque(joint, appliedTourque);
-    	  std::cout << "Angle for joint " << joint << " is " << angleCurrent << " torque is " << appliedTourque << std::endl;
+    	  std::cout << "Angle for joint " << joint << " is " << angleCurrent << " torque is " <<
+    			  appliedTourque << " Error: " << errorDifference << " ErrorDt: " << errorDerivative << std::endl;
     	  this->config[joint] = angleCurrent;
       }
       // btScalar * q = btScalar[3];

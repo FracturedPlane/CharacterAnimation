@@ -3,6 +3,7 @@
 	<name>CharacterAnimation</name>
 	<comment></comment>
 	<projects>
+		<project>bullet3</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
@@ -24,4 +25,10 @@
 		<nature>org.eclipse.cdt.managedbuilder.core.managedBuildNature</nature>
 		<nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
 	</natures>
+	<variableList>
+		<variable>
+			<name>bullet3</name>
+			<value>file:/home/gberseth/playground/CharacterAnimation/bullet3/src</value>
+		</variable>
+	</variableList>
 </projectDescription>
