@@ -70,6 +70,7 @@ struct MultiBodyVehicleSetup : public CommonMultiBodySetup
 
     btMultiBody* m_multiBody;
     std::vector<float> config;
+    std::vector<float> _init_config;
 
 public:
 

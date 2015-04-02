@@ -488,6 +488,7 @@ void MultiBodyVehicleSetup::initPhysics(GraphicsPhysicsBridge& gfxBridge)
 
     m_multiBody = createMultiBodyVehicle(modelInfo, gfxBridge);
     this->config.resize(m_multiBody->getNumLinks());
+    this->_init_config.resize(m_multiBody->getNumLinks());
     this->config[0] = 0.0;
     m_multiBody->setUseGyroTerm(true);
   }    
@@ -525,6 +526,22 @@ void MultiBodyVehicleSetup::initPhysics(GraphicsPhysicsBridge& gfxBridge)
     	gfxBridge.createCollisionObjectGraphicsObject(m_multiBody->getLink(link).m_collider,color);
     }
 
+    for (size_t con=0; con< this->config.size(); con++)
+    {
+    	this->config[con] = m_multiBody->getParentToLocalRot(con).getAngle();
+    	std::cout << "Initial Angle for joint " << con << " is " << this->config[con] << std::endl;
+    }
+    m_multiBody->setLinearDamping(10.0);
+    m_multiBody->setAngularDamping(10.0);
+    std::cout << "Linear dampening" << m_multiBody->getLinearDamping() << std::endl;
+    std::cout << "Angular dampening" << m_multiBody->getAngularDamping() << std::endl;
+
+    // Desired joint angles
+    this->_init_config[0] = 6.0f; // left hip
+    this->_init_config[1] = 0.8f; // left knee
+    this->_init_config[2] = 6.25f; // left ankle
+
+
 
 }
 
@@ -535,11 +552,27 @@ void MultiBodyVehicleSetup::stepSimulation(float deltaTime)
       //m_dynamicsWorld->stepSimulation(deltaTime);
       // std::cout << "MultiBody: " << m_multiBody << " delta time:  " << deltaTime << std::endl;
       // m_multiBody->
-      // this->config[0] = 10.0f;
-      m_multiBody->addJointTorque(1, this->config[0]);
+      float kp = 265.0f;
+      float kd = 140.5f;
+      float desiredAngle = 0.2f;
+      size_t joint=2;
+      // for (size_t joint=0; joint < m_multiBody->getNumLinks(); joint++)
+      // for (size_t joint=0; joint < 3; joint++)
+      {
+    	  desiredAngle = this->_init_config[joint];
+    	  btQuaternion angleQ =  m_multiBody->getParentToLocalRot(joint);
+    	  float angleCurrent = angleQ.getAngle();
+    	  // std::cout << "Angle for joint " << joint << " is " << angleCurrent << std::endl;
+    	  // btVector3 getAngularMomentum()
+    	  float errorDerivative =  ((angleCurrent - desiredAngle) - (this->config[joint] - desiredAngle))/deltaTime;
+    	  float appliedTourque = (kp * (angleCurrent - desiredAngle)) + (kd * (errorDerivative));
+    	  m_multiBody->addJointTorque(joint, appliedTourque);
+    	  std::cout << "Angle for joint " << joint << " is " << angleCurrent << " torque is " << appliedTourque << std::endl;
+    	  this->config[joint] = angleCurrent;
+      }
       // btScalar * q = btScalar[3];
       // m_multiBody->setJointPos(0,config[0]);
       // std::cout << "joint tourqe is " << m_multiBody->getJointTorque(1) << std::endl;
-      config[0] = (config[0] + (deltaTime));
+      // config[0] = (config[0] + (deltaTime));
 }
 
