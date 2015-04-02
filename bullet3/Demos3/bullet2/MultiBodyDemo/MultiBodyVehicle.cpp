@@ -561,7 +561,7 @@ void MultiBodyVehicleSetup::initPhysics(GraphicsPhysicsBridge& gfxBridge)
 	this->_init_config[4] = 0.5f; // right knee
 	this->_init_config[5] = 1.9f; // right ankle
 
-
+	_controllerState = START_WALKING_ON_RIGHT_FOOT;
 
 }
 

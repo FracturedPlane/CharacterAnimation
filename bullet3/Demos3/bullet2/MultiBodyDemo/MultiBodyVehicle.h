@@ -71,10 +71,12 @@ struct MultiBodyVehicleSetup : public CommonMultiBodySetup
     enum ControlerState
     {
     	START_WALKING_ON_RIGHT_FOOT,
-    	WALKING_ON_RIGHT_FOOT,
+    	STANDING_ON_RIGHT_FOOT,
     	START_WALKING_ON_LEFT_FOOT,
-    	START_WALKING_ON_LEFT_FOOT
+    	STANDING_ON_LEFT_FOOT
     };
+
+	ControlerState _controllerState;
 
     btMultiBody* m_multiBody;
     std::vector<float> config;
