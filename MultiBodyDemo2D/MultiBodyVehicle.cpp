@@ -86,10 +86,11 @@ class btMultiBody* MultiBodyVehicleSetup::createMultiBodyVehicle(const ModelCons
   btVector3 inertia(0, 0, 0);
   baseCollisionShape->calculateLocalInertia(static_cast<btScalar>(info.baseMass), inertia);
 
+  bool fixedBase = false;
   btMultiBody * multiBody = new btMultiBody(NUM_LINKS,
       static_cast<btScalar>(info.baseMass),
       inertia,
-      true,
+      fixedBase,
       true,
       true);
 
@@ -565,8 +566,8 @@ void MultiBodyVehicleSetup::stepSimulation(float deltaTime)
       //m_dynamicsWorld->stepSimulation(deltaTime);
       // std::cout << "MultiBody: " << m_multiBody << " delta time:  " << deltaTime << std::endl;
       // m_multiBody->
-      float kp = 205.0f;
-      float kd = 40.5f;
+      float kp = 8.0f;
+      float kd = 0.2f;
       float desiredAngle = 0.2f;
       size_t joint=2;
       float torqueLimit = 60.0;
@@ -580,8 +581,8 @@ void MultiBodyVehicleSetup::stepSimulation(float deltaTime)
     	  float angleCurrent = angleQ.getAngle();
     	  // std::cout << "Angle for joint " << joint << " is " << angleCurrent << std::endl;
     	  // btVector3 getAngularMomentum()
-    	  float errorDerivative =  kd * (((angleCurrent - desiredAngle)) - (this->config[joint] - desiredAngle));
-    	  float errorDifference =  (kp * ((angleCurrent - desiredAngle)));
+    	  float errorDerivative =  kd * (((angleCurrent - desiredAngle)) - (this->config[joint] - desiredAngle)/deltaTime);
+    	  float errorDifference =  (kp * ((angleCurrent - desiredAngle))/deltaTime);
     	  float appliedTourque = -((errorDifference)) + ((errorDerivative));
     	  if (appliedTourque > torqueLimit )
     	  {
