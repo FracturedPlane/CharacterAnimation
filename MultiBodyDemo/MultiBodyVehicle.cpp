@@ -556,6 +556,9 @@ void MultiBodyVehicleSetup::stepSimulation(float deltaTime)
       float kd = 140.5f;
       float desiredAngle = 0.2f;
       size_t joint=2;
+      float torqueLimit = 60.0;
+
+      // Duh torque limits
       // for (size_t joint=0; joint < m_multiBody->getNumLinks(); joint++)
       // for (size_t joint=0; joint < 3; joint++)
       {
@@ -566,6 +569,14 @@ void MultiBodyVehicleSetup::stepSimulation(float deltaTime)
     	  // btVector3 getAngularMomentum()
     	  float errorDerivative =  ((angleCurrent - desiredAngle) - (this->config[joint] - desiredAngle))/deltaTime;
     	  float appliedTourque = (kp * (angleCurrent - desiredAngle)) + (kd * (errorDerivative));
+    	  if (appliedTourque > torqueLimit )
+    	  {
+    		  appliedTourque = torqueLimit;
+    	  }
+    	  if (appliedTourque < -torqueLimit )
+		  {
+			  appliedTourque = -torqueLimit;
+		  }
     	  m_multiBody->addJointTorque(joint, appliedTourque);
     	  std::cout << "Angle for joint " << joint << " is " << angleCurrent << " torque is " << appliedTourque << std::endl;
     	  this->config[joint] = angleCurrent;
