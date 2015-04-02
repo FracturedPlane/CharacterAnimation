@@ -353,7 +353,7 @@ void MultiBodyVehicleSetup::initPhysics(GraphicsPhysicsBridge& gfxBridge)
     leftHipJointInfo.parentLinkIndex = -1;
     leftHipJointInfo.jointType = JointConstructionInfo::REVOLUTE;
     leftHipJointInfo.worldPosition = (btVector3(0.0f, 0.975, 0.1)) + OFFSET;
-    leftHipJointInfo.hingeAxis = (btVector3(0, 0, 1));
+    leftHipJointInfo.hingeAxis = (btVector3(0, 0, -1));
 
     JointConstructionInfo leftKneeJointInfo;
     leftKneeJointInfo.name = "leftKneeJoint";
@@ -361,7 +361,7 @@ void MultiBodyVehicleSetup::initPhysics(GraphicsPhysicsBridge& gfxBridge)
     leftKneeJointInfo.parentLinkIndex = 0;
     leftKneeJointInfo.jointType = JointConstructionInfo::REVOLUTE;
     leftKneeJointInfo.worldPosition = (btVector3(0.0f, 0.525, 0.1)) + OFFSET;
-    leftKneeJointInfo.hingeAxis = (btVector3(0, 0, -1));
+    leftKneeJointInfo.hingeAxis = (btVector3(0, 0, 1));
 
     JointConstructionInfo leftAnkleJointInfo;
     leftAnkleJointInfo.name = "leftAnkleJoint";
@@ -369,7 +369,7 @@ void MultiBodyVehicleSetup::initPhysics(GraphicsPhysicsBridge& gfxBridge)
     leftAnkleJointInfo.parentLinkIndex = 1;
     leftAnkleJointInfo.jointType = JointConstructionInfo::REVOLUTE;
     leftAnkleJointInfo.worldPosition = (btVector3(0.0f, 0.075, 0.1)) + OFFSET;
-    leftAnkleJointInfo.hingeAxis = (btVector3(0, 0, -1));
+    leftAnkleJointInfo.hingeAxis = (btVector3(0, 0, 1));
 
     JointConstructionInfo rightHipJointInfo;
     rightHipJointInfo.name = "rightHipJoint";
@@ -377,7 +377,7 @@ void MultiBodyVehicleSetup::initPhysics(GraphicsPhysicsBridge& gfxBridge)
     rightHipJointInfo.parentLinkIndex = -1;
     rightHipJointInfo.jointType = JointConstructionInfo::REVOLUTE;
     rightHipJointInfo.worldPosition = (btVector3(0.0f, 0.975, -0.1)) + OFFSET;
-    rightHipJointInfo.hingeAxis = (btVector3(0, 0, 1));
+    rightHipJointInfo.hingeAxis = (btVector3(0, 0, -1));
 
     JointConstructionInfo rightKneeJointInfo;
     rightKneeJointInfo.name = "rightKneeJoint";
@@ -385,7 +385,7 @@ void MultiBodyVehicleSetup::initPhysics(GraphicsPhysicsBridge& gfxBridge)
     rightKneeJointInfo.parentLinkIndex = 3;
     rightKneeJointInfo.jointType = JointConstructionInfo::REVOLUTE;
     rightKneeJointInfo.worldPosition = (btVector3(0.0f,  0.525, -0.1)) + OFFSET;
-    rightKneeJointInfo.hingeAxis = (btVector3(0, 0, -1));
+    rightKneeJointInfo.hingeAxis = (btVector3(0, 0, 1));
 
     JointConstructionInfo rightAnkleJointInfo;
     rightAnkleJointInfo.name = "rightAnkleJoint";
@@ -393,7 +393,7 @@ void MultiBodyVehicleSetup::initPhysics(GraphicsPhysicsBridge& gfxBridge)
     rightAnkleJointInfo.parentLinkIndex = 4;
     rightAnkleJointInfo.jointType = JointConstructionInfo::REVOLUTE;
     rightAnkleJointInfo.worldPosition = (btVector3(0.0f, 0.075, -0.1)) + OFFSET;
-    rightAnkleJointInfo.hingeAxis = (btVector3(0, 0, -1));
+    rightAnkleJointInfo.hingeAxis = (btVector3(0, 0, 1));
 /*
     JointConstructionInfo hipToStomachJointInfo;
     hipToStomachJointInfo.name = "hipToStomachJoint";
@@ -583,7 +583,7 @@ void MultiBodyVehicleSetup::stepSimulation(float deltaTime)
     	  // btVector3 getAngularMomentum()
     	  float errorDerivative =  kd * (((angleCurrent - desiredAngle)) - (this->config[joint] - desiredAngle)/deltaTime);
     	  float errorDifference =  (kp * ((angleCurrent - desiredAngle))/deltaTime);
-    	  float appliedTourque = -((errorDifference)) + ((errorDerivative));
+    	  float appliedTourque = ((errorDifference)) + ((errorDerivative));
     	  if (appliedTourque > torqueLimit )
     	  {
     		  appliedTourque = torqueLimit;
