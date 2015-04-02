@@ -120,6 +120,7 @@ class btMultiBody* MultiBodyVehicleSetup::createMultiBodyVehicle(const ModelCons
     btTransform tr;
     tr.setIdentity();
     tr.setOrigin(LINK.position);
+    // tr.rotation3Drad()
     collider->setWorldTransform(tr);
     world->addCollisionObject(collider, 1, 1+2);
     // btRigidBody* body =  createRigidBody(0,start,box);
@@ -152,12 +153,17 @@ class btMultiBody* MultiBodyVehicleSetup::createMultiBodyVehicle(const ModelCons
 
       btVector3 localInertia(0, 0, 0);
       multiBody->getLink(JOINT.linkIndex).m_collider->getCollisionShape()->calculateLocalInertia(static_cast<btScalar>(LINK.mass), localInertia);
-
+      btVector3 linkToParent = parentPosition - JOINT.worldPosition;
+      btVector3 linkToThis = LINK.position - JOINT.worldPosition;
+      btQuaternion rotParentToThis = shortestArcQuatNormalize2(linkToParent, linkToThis);
+      rotParentToThis = btQuaternion(JOINT.hingeAxis, 0.0);
       multiBody->setupRevolute(JOINT.linkIndex,
           LINK.mass,
           localInertia,
           JOINT.parentLinkIndex,
-          btQuaternion(0,0,0,1).inverse(),
+          // btQuaternion(JOINT.hingeAxis.x(),JOINT.hingeAxis.y(),JOINT.hingeAxis.z(),0),
+          rotParentToThis,
+          // btQuaternion(0,0,0,1).inverse(),
           JOINT.hingeAxis,
           JOINT.worldPosition - parentPosition,
           LINK.position - JOINT.worldPosition,
@@ -256,9 +262,9 @@ void MultiBodyVehicleSetup::initPhysics(GraphicsPhysicsBridge& gfxBridge)
 
     BodyConstructionInfo leftFootInfo;
     leftFootInfo.name = "leftFoot";
-    leftFootInfo.halfExtents = (btVector3(0.105, 0.025, 0.05));
+    leftFootInfo.halfExtents = (btVector3(0.025, 0.105, 0.05));
     leftFootInfo.position = (btVector3(0.055f, 0.025, 0.1)) + OFFSET;
-    leftFootInfo.mass = 0.3f;
+    leftFootInfo.mass = 1.0f;
     leftFootInfo.parentIndex = 1;
 
     BodyConstructionInfo rightUpperLegInfo;
@@ -277,9 +283,9 @@ void MultiBodyVehicleSetup::initPhysics(GraphicsPhysicsBridge& gfxBridge)
 
     BodyConstructionInfo rightFootInfo;
     rightFootInfo.name = "rightFoot";
-    rightFootInfo.halfExtents = (btVector3(0.105, 0.025, 0.05));
+    rightFootInfo.halfExtents = (btVector3(0.025, 0.105, 0.05));
     rightFootInfo.position = (btVector3(0.055f, 0.025, -0.1)) + OFFSET;
-    rightFootInfo.mass = 0.3f;
+    rightFootInfo.mass = 1.0f;
     rightFootInfo.parentIndex = 4;
 
     /*
@@ -368,8 +374,8 @@ void MultiBodyVehicleSetup::initPhysics(GraphicsPhysicsBridge& gfxBridge)
     leftAnkleJointInfo.linkIndex = 2;
     leftAnkleJointInfo.parentLinkIndex = 1;
     leftAnkleJointInfo.jointType = JointConstructionInfo::REVOLUTE;
-    leftAnkleJointInfo.worldPosition = (btVector3(0.0f, 0.075, 0.1)) + OFFSET;
-    leftAnkleJointInfo.hingeAxis = (btVector3(0, 0, -1));
+    leftAnkleJointInfo.worldPosition = (btVector3(0.0f, 0.065, 0.1)) + OFFSET;
+    leftAnkleJointInfo.hingeAxis = (btVector3(0, 0, 1));
 
     JointConstructionInfo rightHipJointInfo;
     rightHipJointInfo.name = "rightHipJoint";
@@ -393,7 +399,7 @@ void MultiBodyVehicleSetup::initPhysics(GraphicsPhysicsBridge& gfxBridge)
     rightAnkleJointInfo.parentLinkIndex = 4;
     rightAnkleJointInfo.jointType = JointConstructionInfo::REVOLUTE;
     rightAnkleJointInfo.worldPosition = (btVector3(0.0f, 0.075, -0.1)) + OFFSET;
-    rightAnkleJointInfo.hingeAxis = (btVector3(0, 0, -1));
+    rightAnkleJointInfo.hingeAxis = (btVector3(0, 0, 1));
 /*
     JointConstructionInfo hipToStomachJointInfo;
     hipToStomachJointInfo.name = "hipToStomachJoint";
@@ -550,10 +556,10 @@ void MultiBodyVehicleSetup::initPhysics(GraphicsPhysicsBridge& gfxBridge)
     // Desired joint angles
     this->_init_config[0] = 0.5f; // left hip
     this->_init_config[1] = 0.5f; // left knee
-    this->_init_config[2] = 0.5f; // left ankle
+    this->_init_config[2] = 1.5f; // left ankle
     this->_init_config[3] = 0.5f; // right hip
 	this->_init_config[4] = 0.5f; // right knee
-	this->_init_config[5] = 0.5f; // right ankle
+	this->_init_config[5] = 1.5f; // right ankle
 
 
 
@@ -566,11 +572,11 @@ void MultiBodyVehicleSetup::stepSimulation(float deltaTime)
       //m_dynamicsWorld->stepSimulation(deltaTime);
       // std::cout << "MultiBody: " << m_multiBody << " delta time:  " << deltaTime << std::endl;
       // m_multiBody->
-      float kp = 8.0f;
-      float kd = 0.2f;
+      float kp = 9.0f;
+      float kd = 2.6f;
       float desiredAngle = 0.2f;
       size_t joint=2;
-      float torqueLimit = 60.0;
+      float torqueLimit = 100.0;
 
       // Duh torque limits
       for (size_t joint=0; joint < m_multiBody->getNumLinks(); joint++)
@@ -581,9 +587,10 @@ void MultiBodyVehicleSetup::stepSimulation(float deltaTime)
     	  float angleCurrent = angleQ.getAngle();
     	  // std::cout << "Angle for joint " << joint << " is " << angleCurrent << std::endl;
     	  // btVector3 getAngularMomentum()
-    	  float errorDerivative =  kd * (((angleCurrent - desiredAngle)) - (this->config[joint] - desiredAngle)/deltaTime);
+    	  // float errorDerivative =  kd * (((angleCurrent - desiredAngle)) - (this->config[joint] - desiredAngle)/deltaTime);
+    	  float errorDerivative =  kd * ((angleCurrent - this->config[joint] )/deltaTime);
     	  float errorDifference =  (kp * ((angleCurrent - desiredAngle))/deltaTime);
-    	  float appliedTourque = -((errorDifference)) + ((errorDerivative));
+    	  float appliedTourque = ((errorDifference) + (errorDerivative));// * m_multiBody->getLinkMass(joint);
     	  if (appliedTourque > torqueLimit )
     	  {
     		  appliedTourque = torqueLimit;
