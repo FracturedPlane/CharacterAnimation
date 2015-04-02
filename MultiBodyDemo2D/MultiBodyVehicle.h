@@ -68,6 +68,14 @@ struct MultiBodyVehicleSetup : public CommonMultiBodySetup
       std::vector<JointConstructionInfo> joints;
     };
 
+    enum ControlerState
+    {
+    	START_WALKING_ON_RIGHT_FOOT,
+    	WALKING_ON_RIGHT_FOOT,
+    	START_WALKING_ON_LEFT_FOOT,
+    	START_WALKING_ON_LEFT_FOOT
+    };
+
     btMultiBody* m_multiBody;
     std::vector<float> config;
     std::vector<float> _init_config;
