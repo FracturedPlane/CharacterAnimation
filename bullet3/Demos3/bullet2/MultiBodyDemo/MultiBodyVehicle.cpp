@@ -242,8 +242,8 @@ void MultiBodyVehicleSetup::initPhysics(GraphicsPhysicsBridge& gfxBridge)
     ModelConstructionInfo modelInfo;
     modelInfo.modelName = "M";//  + std::to_string(i);
     modelInfo.baseName = "hips";
-    modelInfo.baseHalfExtents = (btVector3(0.05f, 0.05f, 0.15f));
-    modelInfo.basePosition = (btVector3(0.0f, 1.05, 0.0f)) + OFFSET;
+    modelInfo.baseHalfExtents = (btVector3(0.05f, 0.22f, 0.15f));
+    modelInfo.basePosition = (btVector3(0.0f, 1.20, 0.0f)) + OFFSET;
     modelInfo.baseMass = 1.0f;
 
     BodyConstructionInfo leftUpperLegInfo;
@@ -398,7 +398,7 @@ void MultiBodyVehicleSetup::initPhysics(GraphicsPhysicsBridge& gfxBridge)
     rightAnkleJointInfo.linkIndex = 5;
     rightAnkleJointInfo.parentLinkIndex = 4;
     rightAnkleJointInfo.jointType = JointConstructionInfo::REVOLUTE;
-    rightAnkleJointInfo.worldPosition = (btVector3(0.0f, 0.075, -0.1)) + OFFSET;
+    rightAnkleJointInfo.worldPosition = (btVector3(0.0f, 0.065, -0.1)) + OFFSET;
     rightAnkleJointInfo.hingeAxis = (btVector3(0, 0, 1));
 /*
     JointConstructionInfo hipToStomachJointInfo;
@@ -556,10 +556,10 @@ void MultiBodyVehicleSetup::initPhysics(GraphicsPhysicsBridge& gfxBridge)
     // Desired joint angles
     this->_init_config[0] = 0.5f; // left hip
     this->_init_config[1] = 0.5f; // left knee
-    this->_init_config[2] = 1.5f; // left ankle
+    this->_init_config[2] = 1.9f; // left ankle
     this->_init_config[3] = 0.5f; // right hip
 	this->_init_config[4] = 0.5f; // right knee
-	this->_init_config[5] = 1.5f; // right ankle
+	this->_init_config[5] = 1.9f; // right ankle
 
 
 
