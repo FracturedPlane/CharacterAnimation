@@ -81,7 +81,7 @@ struct MultiBodyVehicleSetup : public CommonMultiBodySetup
     enum jointIndex
     {
     	// HIPS,
-    	HIPS_TO_TOURSO,
+    	// HIPS_TO_TOURSO,
     	HIP_TO_LEFT_THIGH_JOINT,
     	LEFT_THIGH_TO_LEFT_CHIN_JOINT,
     	LEFT_CHIN_TO_LEFT_FOOT_JOINT,
@@ -93,7 +93,7 @@ struct MultiBodyVehicleSetup : public CommonMultiBodySetup
     enum linkIndex
 	{
 		// HIPS,
-		TOURSO,
+		// TOURSO,
 		LEFT_THIGH,
 		LEFT_CHIN,
 		LEFT_FOOT,
@@ -114,6 +114,7 @@ struct MultiBodyVehicleSetup : public CommonMultiBodySetup
     float _root_Kd;
 
     std::vector<std::vector<float> > _init_config_states;
+    std::vector<float> _init_base_config_states;
     size_t _frameNum;
     size_t _lastTransitionFrameNum;
 
