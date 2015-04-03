@@ -81,14 +81,26 @@ struct MultiBodyVehicleSetup : public CommonMultiBodySetup
     enum jointIndex
     {
     	// HIPS,
+    	HIPS_TO_TOURSO,
     	HIP_TO_LEFT_THIGH_JOINT,
     	LEFT_THIGH_TO_LEFT_CHIN_JOINT,
     	LEFT_CHIN_TO_LEFT_FOOT_JOINT,
 		HIP_TO_RIGHT_THIGH_JOINT,
 		RIGHT_THIGH_TO_RIGHT_CHIN_JOINT,
 		RIGHT_CHIN_TO_RIGHT_FOOT_JOINT,
-		TOURSO
     };
+
+    enum linkIndex
+	{
+		// HIPS,
+		TOURSO,
+		LEFT_THIGH,
+		LEFT_CHIN,
+		LEFT_FOOT,
+		RIGHT_THIGH,
+		RIGHT_CHIN,
+		RIGHT_FOOT,
+	};
 
 	ControlerState _controllerState;
 
