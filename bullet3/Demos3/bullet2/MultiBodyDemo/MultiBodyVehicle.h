@@ -80,6 +80,7 @@ struct MultiBodyVehicleSetup : public CommonMultiBodySetup
 
     enum jointIndex
     {
+    	HIPS,
     	HIP_TO_LEFT_THIGH_JOINT,
     	LEFT_THIGH_TO_LEFT_CHIN_JOINT,
     	LEFT_CHIN_TO_LEFT_FOOT_JOINT,
@@ -116,5 +117,6 @@ private:
     std::vector<btMultiBodyLinkCollider *> colliders;
     btBoxShape * getBoxShape(const btVector3 & halfExtents);
 };
+
 #endif //TEST_MULTIBODY_VEHICLE_SETUP_H
 

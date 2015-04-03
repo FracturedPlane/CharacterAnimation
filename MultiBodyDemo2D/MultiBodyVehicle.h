@@ -50,6 +50,8 @@ struct MultiBodyVehicleSetup : public CommonMultiBodySetup
        * Axis of rotation if using hinge joint.
        */
       btVector3 hingeAxis;
+
+      btScalar initAngle;
     };
 
     struct ModelConstructionInfo
@@ -71,14 +73,28 @@ struct MultiBodyVehicleSetup : public CommonMultiBodySetup
     enum ControlerState
     {
     	START_WALKING_ON_RIGHT_FOOT,
-    	WALKING_ON_RIGHT_FOOT,
+    	STANDING_ON_RIGHT_FOOT,
     	START_WALKING_ON_LEFT_FOOT,
-    	START_WALKING_ON_LEFT_FOOT
+    	STANDING_ON_LEFT_FOOT
     };
+
+    enum jointIndex
+    {
+    	HIPS,
+    	HIP_TO_LEFT_THIGH_JOINT,
+    	LEFT_THIGH_TO_LEFT_CHIN_JOINT,
+    	LEFT_CHIN_TO_LEFT_FOOT_JOINT,
+		HIP_TO_RIGHT_THIGH_JOINT,
+		RIGHT_THIGH_TO_RIGHT_CHIN_JOINT,
+		RIGHT_CHIN_TO_RIGHT_FOOT_JOINT
+    };
+
+	ControlerState _controllerState;
 
     btMultiBody* m_multiBody;
     std::vector<float> config;
-    std::vector<float> _init_config;
+    std::vector<std::vector<float> > _init_config_states;
+    size_t _frameNum;
 
 public:
 
@@ -88,6 +104,11 @@ public:
     virtual void initPhysics(GraphicsPhysicsBridge& gfxBridge);
 
     virtual void stepSimulation(float deltaTime);
+    // Initilizes the poses and sets the start pose
+    virtual void initControllerStates();
+    // checks the current state, see if controller should transition
+    virtual void checkControllerStates(size_t frameNum, float dt);
+    virtual void transitionControllerStates();
     
     class btMultiBody* createMultiBodyVehicle(const ModelConstructionInfo & info, GraphicsPhysicsBridge& gfxBridge);
 
@@ -96,5 +117,6 @@ private:
     std::vector<btMultiBodyLinkCollider *> colliders;
     btBoxShape * getBoxShape(const btVector3 & halfExtents);
 };
+
 #endif //TEST_MULTIBODY_VEHICLE_SETUP_H
 
