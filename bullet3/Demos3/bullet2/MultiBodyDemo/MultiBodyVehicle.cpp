@@ -235,29 +235,24 @@ void MultiBodyVehicleSetup::checkGroundContact(size_t frameNum, float dt)
 			if ( _rigth_foot_contact == false )
 			{ // transition from state STANDING_ON_RIGHT_FOOT => START_WALKING_ON_LEFT_FOOT
 				std::cout << "Found A RIGHT foot collision with ground" << std::endl;
+				transitionControllerStates();
 
 			}
 			_rigth_foot_contact = true;
-		}
-		else
-		{
-			_rigth_foot_contact = false;
 		}
 
 		if (  (obA == lFoot.m_collider && obB == this->_ground) ||
 				(obB == lFoot.m_collider && obA == this->_ground))
 		{
 			if ( _left_foot_contact == false )
-			{
+			{ // transition from state STANDING_ON_LEFT_FOOT => START_WALKING_ON_RIGHT_FOOT
 				std::cout << "Found A LEFT foot collision with ground" << std::endl;
+				transitionControllerStates();
 			}
 			_left_foot_contact = true;
 		}
-		else
-		{
-			_left_foot_contact = false;
-		}
 
+		/*
 		int numContacts = contactManifold->getNumContacts();
 		for (int j=0;j<numContacts;j++)
 		{
@@ -268,8 +263,49 @@ void MultiBodyVehicleSetup::checkGroundContact(size_t frameNum, float dt)
 				const btVector3& ptB = pt.getPositionWorldOnB();
 				const btVector3& normalOnB = pt.m_normalWorldOnB;
 			}
+		}*/
+	}
+
+	// deactivate rFoot contact
+
+	size_t r_i=0;
+	for (; r_i < numManifolds ;r_i++)
+	{
+		btPersistentManifold* contactManifold =  this->m_dynamicsWorld->getDispatcher()->getManifoldByIndexInternal(r_i);
+		const btCollisionObject* obA = dynamic_cast<const btCollisionObject*>(contactManifold->getBody0());
+		const btCollisionObject* obB = dynamic_cast<const btCollisionObject*>(contactManifold->getBody1());
+
+		if ( (obA == rFoot.m_collider && obB == this->_ground) ||
+				(obB == rFoot.m_collider && obA == this->_ground))
+		{
+			break;
 		}
 	}
+	if ( r_i == numManifolds)
+	{// found no right foot ground manifolds (contact)
+		_rigth_foot_contact = false;
+	}
+
+	// deactivate lFoot contact
+	size_t l_i=0;
+	for (; l_i < numManifolds ;l_i++)
+	{
+		btPersistentManifold* contactManifold =  this->m_dynamicsWorld->getDispatcher()->getManifoldByIndexInternal(l_i);
+		const btCollisionObject* obA = dynamic_cast<const btCollisionObject*>(contactManifold->getBody0());
+		const btCollisionObject* obB = dynamic_cast<const btCollisionObject*>(contactManifold->getBody1());
+
+		if (  (obA == lFoot.m_collider && obB == this->_ground) ||
+				(obB == lFoot.m_collider && obA == this->_ground))
+		{
+			break;
+		}
+
+	}
+	if ( l_i == numManifolds)
+	{// found no left foot ground manifolds (contact)
+		_left_foot_contact = false;
+	}
+
 
 	// m_dynamicsWorld->contactPairTest(rFoot, this->_ground, NULL);
 	// btMultibodyLink lFoot = this->m_multiBody->;
@@ -280,16 +316,18 @@ void MultiBodyVehicleSetup::checkGroundContact(size_t frameNum, float dt)
 void MultiBodyVehicleSetup::checkControllerStates(size_t frameNum, float dt)
 {
 
-	if ( (((frameNum + 1)-_lastTransitionFrameNum) % 150) == 0) // 500 * 0.3 = 150 frames
+	if ( ((((frameNum + 1)-_lastTransitionFrameNum) % 150) == 0) &&
+			(( this->_controllerState == START_WALKING_ON_LEFT_FOOT) ||
+				this->_controllerState == START_WALKING_ON_RIGHT_FOOT)) // 500 * 0.3 = 150 frames
 	{ // Transition to another state
 		this->transitionControllerStates();
-		std::cout << "Transitioning between states, current state: " << this->_controllerState << std::endl;
 	}
 }
 
 void MultiBodyVehicleSetup::transitionControllerStates()
 {
 	_lastTransitionFrameNum = this->_frameNum;
+	std::cout << "Transitioning between states, current state: " << this->_controllerState << std::endl;
 	if ( this->_controllerState == START_WALKING_ON_RIGHT_FOOT )
 	{
 		this->_controllerState = STANDING_ON_RIGHT_FOOT;
