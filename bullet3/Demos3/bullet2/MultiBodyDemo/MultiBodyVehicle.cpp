@@ -315,8 +315,8 @@ void MultiBodyVehicleSetup::checkGroundContact(size_t frameNum, float dt)
 
 void MultiBodyVehicleSetup::checkControllerStates(size_t frameNum, float dt)
 {
-
-	if ( ((((frameNum + 1)-_lastTransitionFrameNum) % 150) == 0) &&
+	size_t stepLength = 150;
+	if ( ((((frameNum + 1)-_lastTransitionFrameNum) % stepLength) == 0) &&
 			(( this->_controllerState == START_WALKING_ON_LEFT_FOOT) ||
 				this->_controllerState == START_WALKING_ON_RIGHT_FOOT)) // 500 * 0.3 = 150 frames
 	{ // Transition to another state
@@ -769,15 +769,19 @@ void MultiBodyVehicleSetup::initPhysics(GraphicsPhysicsBridge& gfxBridge)
     m_multiBody->setAngularDamping(1.10);
     std::cout << "Linear dampening: " << m_multiBody->getLinearDamping() << std::endl;
     std::cout << "Angular dampening: " << m_multiBody->getAngularDamping() << std::endl;
+    std::cout << "Gravity: (" << m_dynamicsWorld->getGravity().x() << ", " <<
+    		m_dynamicsWorld->getGravity().y() << ", " <<
+			m_dynamicsWorld->getGravity().z() << ")" << std::endl;
+
 
     // Set up kd and kp
     this->_Kds.resize(7);
     this->_Kps.resize(7);
 
     this->_root_Kp = 500.0f;
-    this->_Kps[HIP_TO_LEFT_THIGH_JOINT] = 50.0f;
-    this->_Kps[LEFT_THIGH_TO_LEFT_CHIN_JOINT] = 80.0f;
-    this->_Kps[LEFT_CHIN_TO_LEFT_FOOT_JOINT] = 20.0f;
+    this->_Kps[HIP_TO_LEFT_THIGH_JOINT] = 150.0f;
+    this->_Kps[LEFT_THIGH_TO_LEFT_CHIN_JOINT] = 380.0f;
+    this->_Kps[LEFT_CHIN_TO_LEFT_FOOT_JOINT] = 2.0f;
 
     this->_Kps[HIP_TO_RIGHT_THIGH_JOINT] = this->_Kps[HIP_TO_LEFT_THIGH_JOINT];
 	this->_Kps[RIGHT_THIGH_TO_RIGHT_CHIN_JOINT] = this->_Kps[LEFT_THIGH_TO_LEFT_CHIN_JOINT];
@@ -786,9 +790,9 @@ void MultiBodyVehicleSetup::initPhysics(GraphicsPhysicsBridge& gfxBridge)
 
 
 	this->_root_Kd = 50.0f;
-	this->_Kds[HIP_TO_LEFT_THIGH_JOINT] = 350.0f;
+	this->_Kds[HIP_TO_LEFT_THIGH_JOINT] = 50.0f;
 	this->_Kds[LEFT_THIGH_TO_LEFT_CHIN_JOINT] = 400.0f;
-	this->_Kds[LEFT_CHIN_TO_LEFT_FOOT_JOINT] = 100.0f;
+	this->_Kds[LEFT_CHIN_TO_LEFT_FOOT_JOINT] = 10.0f;
 
 	this->_Kds[HIP_TO_RIGHT_THIGH_JOINT] = this->_Kds[HIP_TO_LEFT_THIGH_JOINT];
 	this->_Kds[RIGHT_THIGH_TO_RIGHT_CHIN_JOINT] = this->_Kds[LEFT_THIGH_TO_LEFT_CHIN_JOINT];
@@ -863,16 +867,15 @@ float angleError2(float desiredAngle, float currentAngle)
 void MultiBodyVehicleSetup::stepSimulation(float deltaTime)
 {
 
-      size_t frameNum = m_dynamicsWorld->stepSimulation(deltaTime, 1, FIXED_STEP);
+      size_t frameNum = m_dynamicsWorld->stepSimulation(FIXED_STEP, 0, FIXED_STEP);
       this->_frameNum++;
       this->checkControllerStates(this->_frameNum, deltaTime);
       this->checkGroundContact(this->_frameNum, deltaTime);
       //m_dynamicsWorld->stepSimulation(deltaTime);
       // std::cout << "frameNum: " << frameNum << " delta time:  " << deltaTime << std::endl;
       // m_multiBody->
-      float desiredAngle = 0.0f;
       size_t joint=2;
-      float torqueLimit = 200.0;
+      float torqueLimit = 300.0;
 
       // Duh torque limits
 
@@ -905,7 +908,12 @@ void MultiBodyVehicleSetup::stepSimulation(float deltaTime)
       for (size_t joint=0; joint < m_multiBody->getNumLinks(); joint++)
       // for (size_t joint=0; joint < 3; joint++)
       {
-    	  desiredAngle = this->_init_config_states[this->_controllerState][joint];
+    	  if ( (joint == HIP_TO_LEFT_THIGH_JOINT) ||
+    			  (joint == HIP_TO_RIGHT_THIGH_JOINT) )
+    	  {
+    		  continue;
+    	  }
+    	  float desiredAngle = this->_init_config_states[this->_controllerState][joint];
     	  btQuaternion angleQ =  m_multiBody->getParentToLocalRot(joint);
     	  float angleCurrent = angleQ.getAngle();
     	  // std::cout << "Angle for joint " << joint << " is " << angleCurrent << std::endl;
@@ -933,19 +941,94 @@ void MultiBodyVehicleSetup::stepSimulation(float deltaTime)
 
 
 
+      float Cd = 0.0018; // Should be positive, want angle to increase when
       if ( (this->_controllerState == STANDING_ON_LEFT_FOOT) ||
     		  ( this->_controllerState == START_WALKING_ON_RIGHT_FOOT))
       { // Stance foot is LEFT FOOT
 
     	  // Balance Feedback
-    	  desiredAngle = this->_init_config_states[this->_controllerState][joint];
+    	  float desiredAngle0 = this->_init_config_states[this->_controllerState][HIP_TO_LEFT_THIGH_JOINT];
+    	  btVector3 footLocation = m_multiBody->getLink(RIGHT_FOOT).m_collider->getWorldTransform().getOrigin();
+    	  std::cout << "RIGHT foot origin? (" << footLocation.x() <<", " << footLocation.y() << ", " <<
+    			  footLocation.z() << ") "<< std::endl;
+
+    	  btVector3 COMLocation = m_multiBody->getLink(TOURSO).m_collider->getWorldTransform().getOrigin();
+    	  COMLocation.setX(-COMLocation.x());
+    	  std::cout << "TOURSO origin? (" << COMLocation.x() <<", " << COMLocation.y() << ", " <<
+    			  COMLocation.z() << ") "<< std::endl;
+
+    	  float distanceFeedback = Cd*((COMLocation.x()) - footLocation.x());
+    	  std::cout << "Distance feedback RIGHT FOOT" << distanceFeedback << std::endl;
+    	  float adjustedDesiredAngle = desiredAngle0 + distanceFeedback;
+
+		  btQuaternion angleQ =  m_multiBody->getParentToLocalRot(joint);
+		  float angleCurrent = angleQ.getAngle();
+		  // std::cout << "Angle for joint " << joint << " is " << angleCurrent << std::endl;
+		  // btVector3 getAngularMomentum()
+		  // float errorDerivative =  kd * (((angleCurrent - desiredAngle)) - (this->config[joint] - desiredAngle)/deltaTime);
+		  float errorDerivative =  _Kds[HIP_TO_RIGHT_THIGH_JOINT] * ((angleCurrent - this->config[joint] )/deltaTime);
+		  // float errorDerivative =  kd * ((this->config[joint+1] - angleCurrent )/deltaTime);
+		  float errorDifference =  (_Kps[HIP_TO_RIGHT_THIGH_JOINT] * (angleError2(angleCurrent, adjustedDesiredAngle))/deltaTime);
+		  // float errorDifference =  (kp * ((desiredAngle - angleCurrent))/deltaTime);
+		  // float errorDifference =  (kp * ((angleCurrent - desiredAngle))/deltaTime);
+		  float appliedTourque = ((errorDifference) + (errorDerivative));// * m_multiBody->getLinkMass(joint);
+
+		  // std::cout << "Left hip applied torque is " << appliedTourque << std::endl;
+		  if (appliedTourque > torqueLimit )
+		  {
+			  appliedTourque = torqueLimit;
+		  }
+		  if (appliedTourque < -torqueLimit )
+		  {
+			  appliedTourque = -torqueLimit;
+		  }
     	  // Need to change joint torque for HIP_TO_LEFT_THIGH_JOINT
-    	  m_multiBody->addJointTorque(HIP_TO_LEFT_THIGH_JOINT,
-    			  -m_multiBody->getJointTorque(TOURSO) -
-    			  m_multiBody->getJointTorque(HIP_TO_RIGHT_THIGH_JOINT));
+		  /*
+    			  */
+		  m_multiBody->addJointTorque(HIP_TO_RIGHT_THIGH_JOINT, appliedTourque );
+
+		  m_multiBody->addJointTorque(HIP_TO_LEFT_THIGH_JOINT,
+		      			  -m_multiBody->getJointTorque(TOURSO) -
+		      			  m_multiBody->getJointTorque(HIP_TO_RIGHT_THIGH_JOINT));
       }
       else
       { // Stance foot is RIGHT foot
+    	  float desiredAngle0 = this->_init_config_states[this->_controllerState][HIP_TO_RIGHT_THIGH_JOINT];
+
+    	  btVector3 footLocation = m_multiBody->getLink(LEFT_FOOT).m_collider->getWorldTransform().getOrigin();
+    	      	  //std::cout << "Right foot origin? (" << footLocation.x() <<", " << footLocation.y() << ", " <<
+    	      		//	  footLocation.z() << ") "<< std::endl;
+
+		  btVector3 COMLocation = m_multiBody->getLink(TOURSO).m_collider->getWorldTransform().getOrigin();
+		  COMLocation.setX(-COMLocation.x());
+		  float distanceFeedback = Cd*((COMLocation.x()) - footLocation.x());
+		  std::cout << "Distance feedback LEFT FOOT" << distanceFeedback << std::endl;
+		  float adjustedDesiredAngle = desiredAngle0 + distanceFeedback;
+
+
+		  btQuaternion angleQ =  m_multiBody->getParentToLocalRot(joint);
+		  float angleCurrent = angleQ.getAngle();
+		  // std::cout << "Angle for joint " << joint << " is " << angleCurrent << std::endl;
+		  // btVector3 getAngularMomentum()
+		  // float errorDerivative =  kd * (((angleCurrent - desiredAngle)) - (this->config[joint] - desiredAngle)/deltaTime);
+		  float errorDerivative =  _Kds[HIP_TO_RIGHT_THIGH_JOINT] * ((angleCurrent - this->config[joint] )/deltaTime);
+		  // float errorDerivative =  kd * ((this->config[joint+1] - angleCurrent )/deltaTime);
+		  float errorDifference =  (_Kps[HIP_TO_RIGHT_THIGH_JOINT] * (angleError2(angleCurrent, adjustedDesiredAngle))/deltaTime);
+		  // float errorDifference =  (kp * ((desiredAngle - angleCurrent))/deltaTime);
+		  // float errorDifference =  (kp * ((angleCurrent - desiredAngle))/deltaTime);
+		  float appliedTourque = ((errorDifference) + (errorDerivative));// * m_multiBody->getLinkMass(joint);
+
+		  // std::cout << "Right hip applied torque is " << appliedTourque << std::endl;
+		  if (appliedTourque > torqueLimit )
+		  {
+			  appliedTourque = torqueLimit;
+		  }
+		  if (appliedTourque < -torqueLimit )
+		  {
+			  appliedTourque = -torqueLimit;
+		  }
+		  m_multiBody->addJointTorque(HIP_TO_LEFT_THIGH_JOINT, appliedTourque );
+
     	  m_multiBody->addJointTorque(HIP_TO_RIGHT_THIGH_JOINT,
     			  -m_multiBody->getJointTorque(TOURSO) -
 				  m_multiBody->getJointTorque(HIP_TO_LEFT_THIGH_JOINT));
@@ -953,7 +1036,6 @@ void MultiBodyVehicleSetup::stepSimulation(float deltaTime)
       }
 
       // btScalar * q = btScalar[3];
-
 
       btVector3 basePos = m_multiBody->getBasePos();
       basePos.setZ(0.0f);
