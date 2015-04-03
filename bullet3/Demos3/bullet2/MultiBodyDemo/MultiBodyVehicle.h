@@ -80,21 +80,30 @@ struct MultiBodyVehicleSetup : public CommonMultiBodySetup
 
     enum jointIndex
     {
-    	HIPS,
+    	// HIPS,
     	HIP_TO_LEFT_THIGH_JOINT,
     	LEFT_THIGH_TO_LEFT_CHIN_JOINT,
     	LEFT_CHIN_TO_LEFT_FOOT_JOINT,
 		HIP_TO_RIGHT_THIGH_JOINT,
 		RIGHT_THIGH_TO_RIGHT_CHIN_JOINT,
-		RIGHT_CHIN_TO_RIGHT_FOOT_JOINT
+		RIGHT_CHIN_TO_RIGHT_FOOT_JOINT,
+		TOURSO
     };
 
 	ControlerState _controllerState;
 
     btMultiBody* m_multiBody;
     std::vector<float> config;
+    std::vector<float> _Kds;
+    std::vector<float> _Kps;
+
+    float _base_config;
+    float _root_Kp;
+    float _root_Kd;
+
     std::vector<std::vector<float> > _init_config_states;
     size_t _frameNum;
+
 
 public:
 

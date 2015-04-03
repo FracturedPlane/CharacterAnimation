@@ -213,7 +213,7 @@ void MultiBodyVehicleSetup::checkControllerStates(size_t frameNum, float dt)
 
 	if ( ((frameNum + 1) % 150) == 0) // 500 * 0.3 = 150 frames
 	{ // Transition to another state
-		// this->transitionControllerStates();
+		this->transitionControllerStates();
 		std::cout << "Transitioning between states, current state: " << this->_controllerState << std::endl;
 	}
 }
@@ -256,7 +256,7 @@ void MultiBodyVehicleSetup::initControllerStates()
 
     // Desired joint angles
 
-	this->_init_config_states[START_WALKING_ON_RIGHT_FOOT][HIPS] = 3.9; // Base
+	this->_init_config_states[START_WALKING_ON_RIGHT_FOOT][TOURSO] = 0.3; // Base
 	this->_init_config_states[START_WALKING_ON_RIGHT_FOOT][HIP_TO_LEFT_THIGH_JOINT] = M_PI_2; // left hip
 	this->_init_config_states[START_WALKING_ON_RIGHT_FOOT][LEFT_THIGH_TO_LEFT_CHIN_JOINT] = M_PI_2; // left knee
 	this->_init_config_states[START_WALKING_ON_RIGHT_FOOT][LEFT_CHIN_TO_LEFT_FOOT_JOINT] = M_PI_2; // left ankle
@@ -272,7 +272,7 @@ void MultiBodyVehicleSetup::initControllerStates()
 	this->_init_config_states[START_WALKING_ON_RIGHT_FOOT][RIGHT_THIGH_TO_RIGHT_CHIN_JOINT] = 3.1f; // right knee
 	this->_init_config_states[START_WALKING_ON_RIGHT_FOOT][RIGHT_CHIN_TO_RIGHT_FOOT_JOINT] = 1.4f; // right ankle
 */
-	this->_init_config_states[STANDING_ON_RIGHT_FOOT][HIPS] = 0.3; // Base
+	this->_init_config_states[STANDING_ON_RIGHT_FOOT][TOURSO] = 0.3; // Base
 	this->_init_config_states[STANDING_ON_RIGHT_FOOT][HIP_TO_LEFT_THIGH_JOINT] = 1.0f; // left hip
 	this->_init_config_states[STANDING_ON_RIGHT_FOOT][LEFT_THIGH_TO_LEFT_CHIN_JOINT] = M_PI_2; // left knee
 	this->_init_config_states[STANDING_ON_RIGHT_FOOT][LEFT_CHIN_TO_LEFT_FOOT_JOINT] = M_PI_2; // left ankle
@@ -280,7 +280,7 @@ void MultiBodyVehicleSetup::initControllerStates()
 	this->_init_config_states[STANDING_ON_RIGHT_FOOT][RIGHT_THIGH_TO_RIGHT_CHIN_JOINT] = M_PI_2; // right knee
 	this->_init_config_states[STANDING_ON_RIGHT_FOOT][RIGHT_CHIN_TO_RIGHT_FOOT_JOINT] = M_PI_2; // right ankle
 
-	this->_init_config_states[START_WALKING_ON_LEFT_FOOT][HIPS] = 0.3; // Base
+	this->_init_config_states[START_WALKING_ON_LEFT_FOOT][TOURSO] = 0.3; // Base
 	this->_init_config_states[START_WALKING_ON_LEFT_FOOT][HIP_TO_LEFT_THIGH_JOINT] = 2.6f; // left hip
 	this->_init_config_states[START_WALKING_ON_LEFT_FOOT][LEFT_THIGH_TO_LEFT_CHIN_JOINT] = 3.1f; // left knee
 	this->_init_config_states[START_WALKING_ON_LEFT_FOOT][LEFT_CHIN_TO_LEFT_FOOT_JOINT] = 1.9f; // left ankle
@@ -288,7 +288,7 @@ void MultiBodyVehicleSetup::initControllerStates()
 	this->_init_config_states[START_WALKING_ON_LEFT_FOOT][RIGHT_THIGH_TO_RIGHT_CHIN_JOINT] = M_PI_2; // right knee
 	this->_init_config_states[START_WALKING_ON_LEFT_FOOT][RIGHT_CHIN_TO_RIGHT_FOOT_JOINT] = M_PI_2; // right ankle
 
-	this->_init_config_states[STANDING_ON_LEFT_FOOT][HIPS] = 0.3; // Base
+	this->_init_config_states[STANDING_ON_LEFT_FOOT][TOURSO] = 0.3; // Base
 	this->_init_config_states[STANDING_ON_LEFT_FOOT][HIP_TO_LEFT_THIGH_JOINT] = M_PI_2; // left hip
 	this->_init_config_states[STANDING_ON_LEFT_FOOT][LEFT_THIGH_TO_LEFT_CHIN_JOINT] = M_PI_2; // left knee
 	this->_init_config_states[STANDING_ON_LEFT_FOOT][LEFT_CHIN_TO_LEFT_FOOT_JOINT] = M_PI_2; // left ankle
@@ -335,60 +335,60 @@ void MultiBodyVehicleSetup::initPhysics(GraphicsPhysicsBridge& gfxBridge)
     ModelConstructionInfo modelInfo;
     modelInfo.modelName = "M";//  + std::to_string(i);
     modelInfo.baseName = "hips";
-    modelInfo.baseHalfExtents = (btVector3(0.05f, 0.22f, 0.15f));
-    modelInfo.basePosition = (btVector3(-0.03f, 0.825, 0.0f)) + OFFSET;
-    modelInfo.baseMass = 10.0f;
+    modelInfo.baseHalfExtents = (btVector3(0.01f, 0.01f, 0.15f));
+    modelInfo.basePosition = (btVector3(-0.03f, 0.625, 0.0f)) + OFFSET;
+    modelInfo.baseMass = 1.0f;
 
     BodyConstructionInfo leftUpperLegInfo;
     leftUpperLegInfo.name = "leftUpperLeg";
     leftUpperLegInfo.halfExtents = (btVector3(0.2, 0.05, 0.05));
     leftUpperLegInfo.position = (btVector3(0.2f, 0.525, 0.1)) + OFFSET;
-    leftUpperLegInfo.mass = 1.0f;
+    leftUpperLegInfo.mass = 11.0f;
     leftUpperLegInfo.parentIndex = -1;
 
     BodyConstructionInfo leftLowerLegInfo;
     leftLowerLegInfo.name = "leftLowerLeg";
     leftLowerLegInfo.halfExtents = (btVector3(0.05, 0.2, 0.05));
     leftLowerLegInfo.position = (btVector3(0.41f, 0.325, 0.1)) + OFFSET;
-    leftLowerLegInfo.mass = 1.0f;
+    leftLowerLegInfo.mass = 8.0f;
     leftLowerLegInfo.parentIndex = 0;
 
     BodyConstructionInfo leftFootInfo;
     leftFootInfo.name = "leftFoot";
     leftFootInfo.halfExtents = (btVector3(0.025, 0.105, 0.05));
     leftFootInfo.position = (btVector3(0.4f, 0.025, 0.1)) + OFFSET;
-    leftFootInfo.mass = 1.0f;
+    leftFootInfo.mass = 2.0f;
     leftFootInfo.parentIndex = 1;
 
     BodyConstructionInfo rightUpperLegInfo;
     rightUpperLegInfo.name = "rightUpperLeg";
     rightUpperLegInfo.halfExtents = (btVector3(0.2, 0.05, 0.05));
     rightUpperLegInfo.position = (btVector3(0.2f, 0.525, -0.1)) + OFFSET;
-    rightUpperLegInfo.mass = 1.0f;
+    rightUpperLegInfo.mass = 11.0f;
     rightUpperLegInfo.parentIndex = -1;
 
     BodyConstructionInfo rightLowerLegInfo;
     rightLowerLegInfo.name = "rightLowerLeg";
     rightLowerLegInfo.halfExtents = (btVector3(0.05, 0.2, 0.05));
     rightLowerLegInfo.position = (btVector3(0.41f, 0.325, -0.1)) + OFFSET;
-    rightLowerLegInfo.mass = 1.0f;
+    rightLowerLegInfo.mass = 8.0f;
     rightLowerLegInfo.parentIndex = 3;
 
     BodyConstructionInfo rightFootInfo;
     rightFootInfo.name = "rightFoot";
     rightFootInfo.halfExtents = (btVector3(0.025, 0.105, 0.05));
     rightFootInfo.position = (btVector3(0.4f, 0.025, -0.1)) + OFFSET;
-    rightFootInfo.mass = 1.0f;
+    rightFootInfo.mass = 2.0f;
     rightFootInfo.parentIndex = 4;
 
-    /*
+
     BodyConstructionInfo stomachInfo;
     stomachInfo.name = "stomach";
-    stomachInfo.halfExtents = flipYandZ(btVector3(0.05f, 0.15f, 0.05f));
-    stomachInfo.position = flipYandZ(btVector3(0.0f, 0.0f, 1.2)) + OFFSET;
-    stomachInfo.mass = 1.0f;
+    stomachInfo.halfExtents = (btVector3(0.05f, 0.25f, 0.15f));
+    stomachInfo.position = (btVector3(-0.09f, 1.0f, 0.0f)) + OFFSET;
+    stomachInfo.mass = 35.0f;
     stomachInfo.parentIndex = -1;
-
+    /*
     BodyConstructionInfo chestInfo;
     chestInfo.name = "chest";
     chestInfo.halfExtents = flipYandZ(btVector3(0.05f, 0.15f, 0.05f));
@@ -500,14 +500,17 @@ void MultiBodyVehicleSetup::initPhysics(GraphicsPhysicsBridge& gfxBridge)
     rightAnkleJointInfo.hingeAxis = (btVector3(0, 0, 1));
     rightAnkleJointInfo.initAngle = this->_init_config_states[this->_controllerState][RIGHT_CHIN_TO_RIGHT_FOOT_JOINT];
 
-/*
+
     JointConstructionInfo hipToStomachJointInfo;
     hipToStomachJointInfo.name = "hipToStomachJoint";
     hipToStomachJointInfo.linkIndex = 6;
     hipToStomachJointInfo.parentLinkIndex = -1;
-    hipToStomachJointInfo.jointType = JointConstructionInfo::SPHERICAL;
-    hipToStomachJointInfo.worldPosition = flipYandZ(btVector3(0.0f, 0.0f, 1.125)) + OFFSET;
+    hipToStomachJointInfo.jointType = JointConstructionInfo::REVOLUTE;
+    hipToStomachJointInfo.worldPosition = (btVector3(0.0f, 0.75, 0.0f)) + OFFSET;
+    hipToStomachJointInfo.hingeAxis = (btVector3(0, 0, -1));
+    hipToStomachJointInfo.initAngle = this->_init_config_states[this->_controllerState][TOURSO];
 
+    /*
     JointConstructionInfo stomachToChestJointInfo;
     stomachToChestJointInfo.name = "stomachToChestJoint";
     stomachToChestJointInfo.linkIndex = 7;
@@ -573,8 +576,8 @@ void MultiBodyVehicleSetup::initPhysics(GraphicsPhysicsBridge& gfxBridge)
     modelInfo.childLinks.push_back(rightUpperLegInfo);
     modelInfo.childLinks.push_back(rightLowerLegInfo);
     modelInfo.childLinks.push_back(rightFootInfo);
-  /*
     modelInfo.childLinks.push_back(stomachInfo);
+    /*
     modelInfo.childLinks.push_back(chestInfo);
     modelInfo.childLinks.push_back(rightArmInfo);
     modelInfo.childLinks.push_back(leftArmInfo);
@@ -591,8 +594,8 @@ void MultiBodyVehicleSetup::initPhysics(GraphicsPhysicsBridge& gfxBridge)
     modelInfo.joints.push_back(rightHipJointInfo);
     modelInfo.joints.push_back(rightKneeJointInfo);
     modelInfo.joints.push_back(rightAnkleJointInfo);
-  /*
     modelInfo.joints.push_back(hipToStomachJointInfo);
+    /*
     modelInfo.joints.push_back(stomachToChestJointInfo);
     modelInfo.joints.push_back(chestToRightArmJoint);
     modelInfo.joints.push_back(chestToLeftArmJoint);
@@ -604,7 +607,7 @@ void MultiBodyVehicleSetup::initPhysics(GraphicsPhysicsBridge& gfxBridge)
 */
 
     m_multiBody = createMultiBodyVehicle(modelInfo, gfxBridge);
-    this->config.resize(m_multiBody->getNumLinks()+1);
+    this->config.resize(m_multiBody->getNumLinks());
     m_multiBody->setUseGyroTerm(true);
   }    
   
@@ -641,17 +644,43 @@ void MultiBodyVehicleSetup::initPhysics(GraphicsPhysicsBridge& gfxBridge)
     	gfxBridge.createCollisionObjectGraphicsObject(m_multiBody->getLink(link).m_collider,color);
     }
 
-    this->config[HIPS] = m_multiBody->getWorldToBaseRot().getAngle();
-    std::cout << "Initial Angle for joint " << HIPS << " is " << this->config[HIPS] << std::endl;
+    this->_base_config = m_multiBody->getWorldToBaseRot().getAngle();
+    std::cout << "Initial Angle for joint ROOT is " << this->_base_config << std::endl;
     for (size_t con=0; con< this->config.size(); con++)
     {
-    	this->config[con+1] = m_multiBody->getParentToLocalRot(con).getAngle();
-    	std::cout << "Initial Angle for joint " << con+1 << " is " << this->config[con+1] << std::endl;
+    	this->config[con] = m_multiBody->getParentToLocalRot(con).getAngle();
+    	std::cout << "Initial Angle for joint " << con << " is " << this->config[con] << std::endl;
     }
-    m_multiBody->setLinearDamping(0.10);
-    m_multiBody->setAngularDamping(0.10);
+    // m_multiBody->setLinearDamping(0.10);
+    // m_multiBody->setAngularDamping(0.10);
     std::cout << "Linear dampening: " << m_multiBody->getLinearDamping() << std::endl;
     std::cout << "Angular dampening: " << m_multiBody->getAngularDamping() << std::endl;
+
+    // Set up kd and kp
+    this->_Kds.resize(7);
+    this->_Kps.resize(7);
+
+    this->_root_Kp = 500.0f;
+    this->_Kps[HIP_TO_LEFT_THIGH_JOINT] = 50.0f;
+    this->_Kps[LEFT_THIGH_TO_LEFT_CHIN_JOINT] = 80.0f;
+    this->_Kps[LEFT_CHIN_TO_LEFT_FOOT_JOINT] = 20.0f;
+
+    this->_Kps[HIP_TO_RIGHT_THIGH_JOINT] = this->_Kps[HIP_TO_LEFT_THIGH_JOINT];
+	this->_Kps[RIGHT_THIGH_TO_RIGHT_CHIN_JOINT] = this->_Kps[LEFT_THIGH_TO_LEFT_CHIN_JOINT];
+	this->_Kps[RIGHT_CHIN_TO_RIGHT_FOOT_JOINT] = this->_Kps[LEFT_CHIN_TO_LEFT_FOOT_JOINT];
+	this->_Kps[TOURSO] = 50;
+
+
+	this->_root_Kd = 50.0f;
+	this->_Kds[HIP_TO_LEFT_THIGH_JOINT] = 350.0f;
+	this->_Kds[LEFT_THIGH_TO_LEFT_CHIN_JOINT] = 400.0f;
+	this->_Kds[LEFT_CHIN_TO_LEFT_FOOT_JOINT] = 100.0f;
+
+	this->_Kds[HIP_TO_RIGHT_THIGH_JOINT] = this->_Kds[HIP_TO_LEFT_THIGH_JOINT];
+	this->_Kds[RIGHT_THIGH_TO_RIGHT_CHIN_JOINT] = this->_Kds[LEFT_THIGH_TO_LEFT_CHIN_JOINT];
+	this->_Kds[RIGHT_CHIN_TO_RIGHT_FOOT_JOINT] = this->_Kds[LEFT_CHIN_TO_LEFT_FOOT_JOINT];
+	this->_Kds[TOURSO] = 350.0;
+
 
 }
 
@@ -719,23 +748,21 @@ void MultiBodyVehicleSetup::stepSimulation(float deltaTime)
       //m_dynamicsWorld->stepSimulation(deltaTime);
       // std::cout << "frameNum: " << frameNum << " delta time:  " << deltaTime << std::endl;
       // m_multiBody->
-      float kp = 100.f;
-      float kd = 10.0f;
       float desiredAngle = 0.0f;
       size_t joint=2;
-      float torqueLimit = 60.0;
+      float torqueLimit = 1000.0;
 
       // Duh torque limits
 
-
+/*
       desiredAngle = this->_init_config_states[this->_controllerState][HIPS];
 
       btQuaternion angleQ =  m_multiBody->getWorldToBaseRot();
       float _angleCurrent = angleQ.getAngle();
 
-      float _errorDerivative =  kd * ((_angleCurrent - this->config[HIPS] )/deltaTime);
-      float _angleError = angleError2(desiredAngle, _angleCurrent);
-	  float _errorDifference =  (kp * (_angleError)/deltaTime);
+      float _errorDerivative =  this->_root_Kp * ((_angleCurrent - this->config[HIPS] )/deltaTime);
+      float _angleError = -angleError2(_angleCurrent, desiredAngle);
+	  float _errorDifference =  (this->_root_Kd * (_angleError)/deltaTime);
 	  // float _errorDifference =  (kp * ((desiredAngle - _angleCurrent))/deltaTime);
 	  float appliedTourque = ((_errorDifference) + (_errorDerivative));// * m_multiBody->getLinkMass(joint);
 	  if (appliedTourque > torqueLimit )
@@ -746,28 +773,26 @@ void MultiBodyVehicleSetup::stepSimulation(float deltaTime)
 	  {
 		  appliedTourque = -torqueLimit;
 	  }
-	  // m_multiBody->addBaseTorque(btVector3(0,0,30));
+	  m_multiBody->addBaseTorque(btVector3(0,0,appliedTourque));
 	  this->config[HIPS] = _angleCurrent;
 	  // std::cout << "desiredAngle: " << desiredAngle << " currentAngle for joint " << HIPS << " is " << _angleCurrent << " torque is " <<
 	     // 	appliedTourque << " Error: " << _angleError << " ErrorDt: " << _errorDerivative << std::endl;
-
-      kp = 10.f;
-      kd = 7.f;
+*/
 
       for (size_t joint=0; joint < m_multiBody->getNumLinks(); joint++)
       // for (size_t joint=0; joint < 3; joint++)
       {
-    	  desiredAngle = this->_init_config_states[this->_controllerState][joint+1];
+    	  desiredAngle = this->_init_config_states[this->_controllerState][joint];
     	  btQuaternion angleQ =  m_multiBody->getParentToLocalRot(joint);
     	  float angleCurrent = angleQ.getAngle();
     	  // std::cout << "Angle for joint " << joint << " is " << angleCurrent << std::endl;
     	  // btVector3 getAngularMomentum()
     	  // float errorDerivative =  kd * (((angleCurrent - desiredAngle)) - (this->config[joint] - desiredAngle)/deltaTime);
-    	  float errorDerivative =  kd * ((angleCurrent - this->config[joint+1] )/deltaTime);
+    	  float errorDerivative =  _Kds[joint] * ((angleCurrent - this->config[joint] )/deltaTime);
     	  // float errorDerivative =  kd * ((this->config[joint+1] - angleCurrent )/deltaTime);
-    	  // float errorDifference =  (kp * (angleError2(desiredAngle , angleCurrent))/deltaTime);
+    	  float errorDifference =  (_Kps[joint] * (angleError2(angleCurrent, desiredAngle))/deltaTime);
     	  // float errorDifference =  (kp * ((desiredAngle - angleCurrent))/deltaTime);
-    	  float errorDifference =  (kp * ((angleCurrent - desiredAngle))/deltaTime);
+    	  // float errorDifference =  (kp * ((angleCurrent - desiredAngle))/deltaTime);
     	  float appliedTourque = ((errorDifference) + (errorDerivative));// * m_multiBody->getLinkMass(joint);
     	  if (appliedTourque > torqueLimit )
     	  {
@@ -780,10 +805,10 @@ void MultiBodyVehicleSetup::stepSimulation(float deltaTime)
     	  m_multiBody->addJointTorque(joint, appliedTourque);
     	  std::cout << "Angle for joint " << joint << " is " << angleCurrent << " torque is " <<
     			appliedTourque << " Error: " << errorDifference << " ErrorDt: " << errorDerivative << std::endl;
-    	  this->config[joint+1] = angleCurrent;
+    	  this->config[joint] = angleCurrent;
       }
 
-      /*
+
       if ( (this->_controllerState == STANDING_ON_LEFT_FOOT) ||
     		  ( this->_controllerState == START_WALKING_ON_RIGHT_FOOT))
       { // Stance foot is LEFT FOOT
@@ -792,17 +817,17 @@ void MultiBodyVehicleSetup::stepSimulation(float deltaTime)
     	  desiredAngle = this->_init_config_states[this->_controllerState][joint];
     	  // Need to change joint torque for HIP_TO_LEFT_THIGH_JOINT
     	  m_multiBody->addJointTorque(HIP_TO_LEFT_THIGH_JOINT,
-    			  -m_multiBody->getBaseTorque().z() -
+    			  -m_multiBody->getJointTorque(TOURSO) -
     			  m_multiBody->getJointTorque(HIP_TO_RIGHT_THIGH_JOINT));
       }
       else
       { // Stance foot is RIGHT foot
     	  m_multiBody->addJointTorque(HIP_TO_RIGHT_THIGH_JOINT,
-				  -m_multiBody->getBaseTorque().z() -
+    			  -m_multiBody->getJointTorque(TOURSO) -
 				  m_multiBody->getJointTorque(HIP_TO_LEFT_THIGH_JOINT));
 
       }
-      */
+
       // btScalar * q = btScalar[3];
 
 
