@@ -115,6 +115,12 @@ struct MultiBodyVehicleSetup : public CommonMultiBodySetup
 
     std::vector<std::vector<float> > _init_config_states;
     size_t _frameNum;
+    size_t _lastTransitionFrameNum;
+
+    btRigidBody * _ground;
+    bool _rigth_foot_contact;
+    bool _left_foot_contact;
+
 
 
 public:
@@ -129,8 +135,12 @@ public:
     virtual void initControllerStates();
     // checks the current state, see if controller should transition
     virtual void checkControllerStates(size_t frameNum, float dt);
+    virtual void checkGroundContact(size_t frameNum, float dt);
     virtual void transitionControllerStates();
     
+    // void rightFootContactCallback(btRigidBody& rFoot , btRigidBody& ground )
+       //      : btCollisionWorld::ContactResultCallback(), body(rFoot)  { }
+
     class btMultiBody* createMultiBodyVehicle(const ModelConstructionInfo & info, GraphicsPhysicsBridge& gfxBridge);
 
 private:
@@ -139,5 +149,48 @@ private:
     btBoxShape * getBoxShape(const btVector3 & halfExtents);
 };
 
+#include <iostream>
+
+struct ContactSensorCallback : public btCollisionWorld::ContactResultCallback {
+
+    //! Constructor, pass whatever context you want to have available when processing contacts
+    /*! You may also want to set m_collisionFilterGroup and m_collisionFilterMask
+     *  (supplied by the superclass) for needsCollision() */
+    ContactSensorCallback(btCollisionObject& rFoot , btRigidBody& ground  /*, ... */)
+        : btCollisionWorld::ContactResultCallback(), _rFoot(rFoot), _ground(ground) { }
+
+    btCollisionObject& _rFoot; //!< The body the sensor is monitoring
+    btRigidBody& _ground; //!< The body the sensor is monitoring
+    // YourContext& ctxt; //!< External information for contact processing
+
+    //! If you don't want to consider collisions where the bodies are joined by a constraint, override needsCollision:
+    /*! However, if you use a btCollisionObject for #body instead of a btRigidBody,
+     *  then this is unnecessary—checkCollideWithOverride isn't available */
+    virtual bool needsCollision(btBroadphaseProxy* proxy) const {
+        // superclass will check m_collisionFilterGroup and m_collisionFilterMask
+    	std::cout << "Found SOME?? Foot Ground collision" << std::endl;
+        if(!btCollisionWorld::ContactResultCallback::needsCollision(proxy))
+            return false;
+        // if passed filters, may also want to avoid contacts between constraints
+        return _rFoot.checkCollideWithOverride(static_cast<btCollisionObject*>(proxy->m_clientObject));
+    }
+
+    //! Called with each contact for your own processing (e.g. test if contacts fall in within sensor parameters)
+    virtual btScalar addSingleResult(btManifoldPoint& cp,
+        const btCollisionObjectWrapper* colObj0,int partId0,int index0,
+        const btCollisionObjectWrapper* colObj1,int partId1,int index1)
+    {
+        btVector3 pt; // will be set to point of collision relative to body
+        if(colObj0->m_collisionObject==&_rFoot) {
+            pt = cp.m_localPointA;
+        } else {
+            assert(colObj1->m_collisionObject==&_rFoot && "body does not match either collision object");
+            pt = cp.m_localPointB;
+        }
+        // do stuff with the collision point
+        std::cout << "Found Foot Ground collision" << std::endl;
+        return 0; // There was a planned purpose for the return value of addSingleResult, but it is not used so you can ignore it.
+    }
+};
 #endif //TEST_MULTIBODY_VEHICLE_SETUP_H
 

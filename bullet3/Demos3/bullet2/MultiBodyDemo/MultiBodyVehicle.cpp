@@ -50,6 +50,10 @@ btBoxShape * MultiBodyVehicleSetup::getBoxShape(const btVector3 & halfExtents)
 
 MultiBodyVehicleSetup::MultiBodyVehicleSetup()
 {
+
+	_rigth_foot_contact = false;
+	_left_foot_contact =  false;
+	_lastTransitionFrameNum = 0;
 }
 
 MultiBodyVehicleSetup::~MultiBodyVehicleSetup()
@@ -208,10 +212,75 @@ class btMultiBody* MultiBodyVehicleSetup::createMultiBodyVehicle(const ModelCons
   return multiBody;
 }
 
+void MultiBodyVehicleSetup::checkGroundContact(size_t frameNum, float dt)
+{
+	btMultibodyLink rFoot = this->m_multiBody->getLink(RIGHT_FOOT);
+	btMultibodyLink lFoot = this->m_multiBody->getLink(LEFT_FOOT);
+
+	// if ( rFoot.m_collider->checkCollideWithOverride(this->_ground) )
+	{
+		// std::cout << "Right foot contact" << std::endl;
+	}
+
+	int numManifolds = this->m_dynamicsWorld->getDispatcher()->getNumManifolds();
+	for (int i=0;i<numManifolds;i++)
+	{
+		btPersistentManifold* contactManifold =  this->m_dynamicsWorld->getDispatcher()->getManifoldByIndexInternal(i);
+		const btCollisionObject* obA = dynamic_cast<const btCollisionObject*>(contactManifold->getBody0());
+		const btCollisionObject* obB = dynamic_cast<const btCollisionObject*>(contactManifold->getBody1());
+
+		if ( (obA == rFoot.m_collider && obB == this->_ground) ||
+				(obB == rFoot.m_collider && obA == this->_ground))
+		{
+			if ( _rigth_foot_contact == false )
+			{ // transition from state STANDING_ON_RIGHT_FOOT => START_WALKING_ON_LEFT_FOOT
+				std::cout << "Found A RIGHT foot collision with ground" << std::endl;
+
+			}
+			_rigth_foot_contact = true;
+		}
+		else
+		{
+			_rigth_foot_contact = false;
+		}
+
+		if (  (obA == lFoot.m_collider && obB == this->_ground) ||
+				(obB == lFoot.m_collider && obA == this->_ground))
+		{
+			if ( _left_foot_contact == false )
+			{
+				std::cout << "Found A LEFT foot collision with ground" << std::endl;
+			}
+			_left_foot_contact = true;
+		}
+		else
+		{
+			_left_foot_contact = false;
+		}
+
+		int numContacts = contactManifold->getNumContacts();
+		for (int j=0;j<numContacts;j++)
+		{
+			btManifoldPoint& pt = contactManifold->getContactPoint(j);
+			if (pt.getDistance()<0.f)
+			{
+				const btVector3& ptA = pt.getPositionWorldOnA();
+				const btVector3& ptB = pt.getPositionWorldOnB();
+				const btVector3& normalOnB = pt.m_normalWorldOnB;
+			}
+		}
+	}
+
+	// m_dynamicsWorld->contactPairTest(rFoot, this->_ground, NULL);
+	// btMultibodyLink lFoot = this->m_multiBody->;
+
+
+}
+
 void MultiBodyVehicleSetup::checkControllerStates(size_t frameNum, float dt)
 {
 
-	if ( ((frameNum + 1) % 150) == 0) // 500 * 0.3 = 150 frames
+	if ( (((frameNum + 1)-_lastTransitionFrameNum) % 150) == 0) // 500 * 0.3 = 150 frames
 	{ // Transition to another state
 		this->transitionControllerStates();
 		std::cout << "Transitioning between states, current state: " << this->_controllerState << std::endl;
@@ -220,6 +289,7 @@ void MultiBodyVehicleSetup::checkControllerStates(size_t frameNum, float dt)
 
 void MultiBodyVehicleSetup::transitionControllerStates()
 {
+	_lastTransitionFrameNum = this->_frameNum;
 	if ( this->_controllerState == START_WALKING_ON_RIGHT_FOOT )
 	{
 		this->_controllerState = STANDING_ON_RIGHT_FOOT;
@@ -297,13 +367,12 @@ void MultiBodyVehicleSetup::initControllerStates()
 	this->_init_config_states[STANDING_ON_LEFT_FOOT][RIGHT_CHIN_TO_RIGHT_FOOT_JOINT] = M_PI_2; // right ankle
 
 
-
 }
 
 void MultiBodyVehicleSetup::initPhysics(GraphicsPhysicsBridge& gfxBridge)
 {
   int upAxis = 1;
-  this->initControllerStates();
+
   this->_frameNum = 0;
 
   btVector4 colors[4] =
@@ -315,7 +384,7 @@ void MultiBodyVehicleSetup::initPhysics(GraphicsPhysicsBridge& gfxBridge)
   };
   int curColor = 0;
 
-
+  this->initControllerStates();
 
     gfxBridge.setUpAxis(upAxis);
 
@@ -615,24 +684,6 @@ void MultiBodyVehicleSetup::initPhysics(GraphicsPhysicsBridge& gfxBridge)
     m_multiBody->setUseGyroTerm(true);
   }    
   
-    if (1)
-    {
-        btVector3 groundHalfExtents(20,20,20);
-        groundHalfExtents[upAxis]=1.f;
-        btBoxShape* box = new btBoxShape(groundHalfExtents);
-        box->initializePolyhedralFeatures();
-        
-        gfxBridge.createCollisionShapeGraphicsObject(box);
-        btTransform start; start.setIdentity();
-        btVector3 groundOrigin(0,0,0);
-        groundOrigin[upAxis]=-1.5;
-        start.setOrigin(groundOrigin);
-        btRigidBody* body =  createRigidBody(0,start,box);
-        btVector4 color = colors[curColor];
-        curColor++;
-        curColor&=3;
-        gfxBridge.createRigidBodyGraphicsObject(body,color);
-    }
 
     btVector4 color = colors[curColor];
     gfxBridge.createCollisionShapeGraphicsObject(m_multiBody->getBaseCollider()->getCollisionShape());
@@ -647,6 +698,27 @@ void MultiBodyVehicleSetup::initPhysics(GraphicsPhysicsBridge& gfxBridge)
     	gfxBridge.createCollisionShapeGraphicsObject(m_multiBody->getLink(link).m_collider->getCollisionShape());
     	gfxBridge.createCollisionObjectGraphicsObject(m_multiBody->getLink(link).m_collider,color);
     }
+
+    if (1)
+      { // Add Ground
+          btVector3 groundHalfExtents(10,0.5,10);
+          // groundHalfExtents[upAxis]=1.f;
+          btBoxShape* box = new btBoxShape(groundHalfExtents);
+          box->initializePolyhedralFeatures();
+
+          gfxBridge.createCollisionShapeGraphicsObject(box);
+          btTransform start; start.setIdentity();
+          btVector3 groundOrigin(0,0,0);
+          groundOrigin[upAxis]=-1.0;
+          start.setOrigin(groundOrigin);
+          btRigidBody* body =  createRigidBody(0,start,box);
+          this->_ground = body;
+          btVector4 color = colors[curColor];
+          curColor++;
+          curColor&=3;
+          gfxBridge.createRigidBodyGraphicsObject(body,color);
+      }
+
 
     this->_base_config = m_multiBody->getWorldToBaseRot().getAngle();
     std::cout << "Initial Angle for joint ROOT is " << this->_base_config << std::endl;
@@ -684,6 +756,13 @@ void MultiBodyVehicleSetup::initPhysics(GraphicsPhysicsBridge& gfxBridge)
 	this->_Kds[RIGHT_THIGH_TO_RIGHT_CHIN_JOINT] = this->_Kds[LEFT_THIGH_TO_LEFT_CHIN_JOINT];
 	this->_Kds[RIGHT_CHIN_TO_RIGHT_FOOT_JOINT] = this->_Kds[LEFT_CHIN_TO_LEFT_FOOT_JOINT];
 	this->_Kds[HIPS_TO_TOURSO] = 30.0;
+
+
+	btMultibodyLink rFoot = this->m_multiBody->getLink(RIGHT_FOOT);
+
+	ContactSensorCallback callback(*rFoot.m_collider, *this->_ground);
+	m_dynamicsWorld->contactPairTest((rFoot.m_collider), this->_ground, callback);
+
 
 
 }
@@ -749,6 +828,7 @@ void MultiBodyVehicleSetup::stepSimulation(float deltaTime)
       size_t frameNum = m_dynamicsWorld->stepSimulation(deltaTime, 1, FIXED_STEP);
       this->_frameNum++;
       this->checkControllerStates(this->_frameNum, deltaTime);
+      this->checkGroundContact(this->_frameNum, deltaTime);
       //m_dynamicsWorld->stepSimulation(deltaTime);
       // std::cout << "frameNum: " << frameNum << " delta time:  " << deltaTime << std::endl;
       // m_multiBody->
@@ -808,13 +888,13 @@ void MultiBodyVehicleSetup::stepSimulation(float deltaTime)
 			  appliedTourque = -torqueLimit;
 		  }
     	  m_multiBody->addJointTorque(joint, appliedTourque);
-    	  std::cout << "Angle for joint " << joint << " is " << angleCurrent << " torque is " <<
-    			appliedTourque << " Error: " << errorDifference << " ErrorDt: " << errorDerivative << std::endl;
+    	  // std::cout << "Angle for joint " << joint << " is " << angleCurrent << " torque is " <<
+    		//	appliedTourque << " Error: " << errorDifference << " ErrorDt: " << errorDerivative << std::endl;
     	  this->config[joint] = angleCurrent;
       }
 
 
-/*
+
       if ( (this->_controllerState == STANDING_ON_LEFT_FOOT) ||
     		  ( this->_controllerState == START_WALKING_ON_RIGHT_FOOT))
       { // Stance foot is LEFT FOOT
@@ -833,7 +913,7 @@ void MultiBodyVehicleSetup::stepSimulation(float deltaTime)
 				  m_multiBody->getJointTorque(HIP_TO_LEFT_THIGH_JOINT));
 
       }
-*/
+
       // btScalar * q = btScalar[3];
 
 
