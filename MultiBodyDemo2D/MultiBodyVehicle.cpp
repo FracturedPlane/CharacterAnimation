@@ -121,12 +121,27 @@ class btMultiBody* MultiBodyVehicleSetup::createMultiBodyVehicle(const ModelCons
           i));
     btMultiBodyLinkCollider * collider = this->colliders.back();
     collider->setCollisionShape(collisionShape);
+    collider->setFriction(0.5);
+    // collider->setRestitution()
+    std::cout << "Collider friction" << collider->getFriction() << " restitution " << collider->getRestitution() << std::endl;
+    // collider->
+    /*
+    const btCollisionShape* parent0 = colObj0Wrap->getCollisionObject()->getCollisionShape();
+	if(parent0 != 0 && parent0->getShapeType() == MULTIMATERIAL_TRIANGLE_MESH_PROXYTYPE)
+	{
+		btMultimaterialTriangleMeshShape* shape = (btMultimaterialTriangleMeshShape*)parent0;
+		const btMaterial * props = shape->getMaterialProperties(partId0, index0);
+		cp.m_combinedFriction = calculateCombinedFriction(props->m_friction, colObj1Wrap->getCollisionObject()->getFriction());
+		cp.m_combinedRestitution = props->m_restitution * colObj1Wrap->getCollisionObject()->getRestitution();
+	}*/
     btTransform tr;
     tr.setIdentity();
     tr.setOrigin(LINK.position);
     // tr.rotation3Drad()
     collider->setWorldTransform(tr);
     world->addCollisionObject(collider, 1, 1+2);
+    // world->add
+    // world->
     // btRigidBody* body =  createRigidBody(0,start,box);
     multiBody->getLink(i).m_collider = collider;
     btVector4 colour = colors[curColor];
@@ -235,10 +250,14 @@ void MultiBodyVehicleSetup::checkGroundContact(size_t frameNum, float dt)
 			if ( _rigth_foot_contact == false )
 			{ // transition from state STANDING_ON_RIGHT_FOOT => START_WALKING_ON_LEFT_FOOT
 				std::cout << "Found A RIGHT foot collision with ground" << std::endl;
-				transitionControllerStates();
+				if ( this->_controllerState == STANDING_ON_RIGHT_FOOT )
+				{
+					transitionControllerStates();
+				}
 
 			}
 			_rigth_foot_contact = true;
+			// _left_foot_contact = false;
 		}
 
 		if (  (obA == lFoot.m_collider && obB == this->_ground) ||
@@ -247,7 +266,10 @@ void MultiBodyVehicleSetup::checkGroundContact(size_t frameNum, float dt)
 			if ( _left_foot_contact == false )
 			{ // transition from state STANDING_ON_LEFT_FOOT => START_WALKING_ON_RIGHT_FOOT
 				std::cout << "Found A LEFT foot collision with ground" << std::endl;
-				transitionControllerStates();
+				if ( this->_controllerState == STANDING_ON_RIGHT_FOOT )
+				{
+					transitionControllerStates();
+				}
 			}
 			_left_foot_contact = true;
 		}
@@ -283,6 +305,10 @@ void MultiBodyVehicleSetup::checkGroundContact(size_t frameNum, float dt)
 	}
 	if ( r_i == numManifolds)
 	{// found no right foot ground manifolds (contact)
+		if (_rigth_foot_contact)
+		{
+			std::cout << "Deactivating Right foot contact" << std::endl;
+		}
 		_rigth_foot_contact = false;
 	}
 
@@ -303,6 +329,10 @@ void MultiBodyVehicleSetup::checkGroundContact(size_t frameNum, float dt)
 	}
 	if ( l_i == numManifolds)
 	{// found no left foot ground manifolds (contact)
+		if (_left_foot_contact)
+		{
+			std::cout << "Deactivating Left foot contact" << std::endl;
+		}
 		_left_foot_contact = false;
 	}
 
@@ -316,9 +346,9 @@ void MultiBodyVehicleSetup::checkGroundContact(size_t frameNum, float dt)
 void MultiBodyVehicleSetup::checkControllerStates(size_t frameNum, float dt)
 {
 	size_t stepLength = 150;
-	if ( ((((frameNum + 1)-_lastTransitionFrameNum) % stepLength) == 0) &&
-			(( this->_controllerState == START_WALKING_ON_LEFT_FOOT) ||
-				this->_controllerState == START_WALKING_ON_RIGHT_FOOT)) // 500 * 0.3 = 150 frames
+	if ( ((((frameNum + 1)-_lastTransitionFrameNum) % stepLength) == 0) )//  &&
+			// (( this->_controllerState == START_WALKING_ON_LEFT_FOOT) ||
+				// this->_controllerState == START_WALKING_ON_RIGHT_FOOT)) // 500 * 0.3 = 150 frames
 	{ // Transition to another state
 		this->transitionControllerStates();
 	}
@@ -356,7 +386,7 @@ void MultiBodyVehicleSetup::transitionControllerStates()
 void MultiBodyVehicleSetup::initControllerStates()
 {
 
-	this->_controllerState = STANDING_ON_RIGHT_FOOT;
+	this->_controllerState = START_WALKING_ON_RIGHT_FOOT;
 
 	this->_init_config_states.resize(4);
 	this->_init_base_config_states.resize(4);
@@ -786,10 +816,10 @@ void MultiBodyVehicleSetup::initPhysics(GraphicsPhysicsBridge& gfxBridge)
     this->_Kds.resize(6);
     this->_Kps.resize(6);
 
-    this->_root_Kp = 50.0f;
-    this->_Kps[HIP_TO_LEFT_THIGH_JOINT] = 25.0f;
-    this->_Kps[LEFT_THIGH_TO_LEFT_CHIN_JOINT] = 8.0f;
-    this->_Kps[LEFT_CHIN_TO_LEFT_FOOT_JOINT] = 2.0f;
+    this->_root_Kp = 2.0f;
+    this->_Kps[HIP_TO_LEFT_THIGH_JOINT] = 2.5f;
+    this->_Kps[LEFT_THIGH_TO_LEFT_CHIN_JOINT] = 4.0f;
+    this->_Kps[LEFT_CHIN_TO_LEFT_FOOT_JOINT] = 0.50f;
 
     this->_Kps[HIP_TO_RIGHT_THIGH_JOINT] = this->_Kps[HIP_TO_LEFT_THIGH_JOINT];
 	this->_Kps[RIGHT_THIGH_TO_RIGHT_CHIN_JOINT] = this->_Kps[LEFT_THIGH_TO_LEFT_CHIN_JOINT];
@@ -797,10 +827,10 @@ void MultiBodyVehicleSetup::initPhysics(GraphicsPhysicsBridge& gfxBridge)
 	// this->_Kps[HIPS_TO_TOURSO] = 50;
 
 
-	this->_root_Kd = 150.0f;
-	this->_Kds[HIP_TO_LEFT_THIGH_JOINT] = 50.0f;
-	this->_Kds[LEFT_THIGH_TO_LEFT_CHIN_JOINT] = 40.0f;
-	this->_Kds[LEFT_CHIN_TO_LEFT_FOOT_JOINT] = 10.0f;
+	this->_root_Kd = .50f;
+	this->_Kds[HIP_TO_LEFT_THIGH_JOINT] = 1.00f;
+	this->_Kds[LEFT_THIGH_TO_LEFT_CHIN_JOINT] = 0.50f;
+	this->_Kds[LEFT_CHIN_TO_LEFT_FOOT_JOINT] = 0.10f;
 
 	this->_Kds[HIP_TO_RIGHT_THIGH_JOINT] = this->_Kds[HIP_TO_LEFT_THIGH_JOINT];
 	this->_Kds[RIGHT_THIGH_TO_RIGHT_CHIN_JOINT] = this->_Kds[LEFT_THIGH_TO_LEFT_CHIN_JOINT];
@@ -814,6 +844,9 @@ void MultiBodyVehicleSetup::initPhysics(GraphicsPhysicsBridge& gfxBridge)
 	ContactSensorCallback callback(*rFoot.m_collider, *this->_ground);
 	m_dynamicsWorld->contactPairTest((rFoot.m_collider), this->_ground, callback);
 */
+
+	m_multiBody->setBaseVel(btVector3(-0.5,0,0));
+	m_multiBody->addBaseForce(btVector3(-20000.5,0,0));
 
 
 }
@@ -886,7 +919,7 @@ void MultiBodyVehicleSetup::stepSimulation(float deltaTime)
       // std::cout << "frameNum: " << frameNum << " delta time:  " << deltaTime << std::endl;
       // m_multiBody->
       size_t joint=2;
-      float torqueLimit = 300.0;
+      float torqueLimit = 200.0;
 
       // Duh torque limits
 
@@ -911,11 +944,11 @@ void MultiBodyVehicleSetup::stepSimulation(float deltaTime)
 	  {
 		  appliedTourque = -torqueLimit;
 	  }
-	  m_multiBody->addBaseTorque(btVector3(0,0,appliedTourque));
+	  // m_multiBody->addBaseTorque(btVector3(0,0,appliedTourque));
 	  this->_base_torque = appliedTourque;
 	  this->_base_config = _angleCurrent;
-	  std::cout << "desiredAngle: " << rootdesiredAngle << " currentAngle for joint " << "BASE" << " is " << _angleCurrent << " torque is " <<
-	     	appliedTourque << " Error: " << _angleError << " ErrorDt: " << _errorDerivative << std::endl;
+	  // std::cout << "desiredAngle: " << rootdesiredAngle << " currentAngle for joint " << "BASE" << " is " << _angleCurrent << " torque is " <<
+	     // appliedTourque << " Error: " << _angleError << " ErrorDt: " << _errorDerivative << std::endl;
 
 
 
@@ -956,7 +989,11 @@ void MultiBodyVehicleSetup::stepSimulation(float deltaTime)
 
 
 
-      float Cd = 0.18; // Should be positive, want angle to increase when
+      btVector3 _baseVelocity = m_multiBody->getBaseVel();
+      // _baseVelocity.setX(-0.5);
+      // m_multiBody->setBaseVel(_baseVelocity);
+      float Cd = 10.8; // Should be positive, want angle to increase when
+      float Cv = -0.05; // Should be positive, want angle to increase when
       if ( (this->_controllerState == STANDING_ON_LEFT_FOOT) ||
     		  ( this->_controllerState == START_WALKING_ON_RIGHT_FOOT))
       { // Stance foot is LEFT FOOT
@@ -964,17 +1001,18 @@ void MultiBodyVehicleSetup::stepSimulation(float deltaTime)
     	  // Balance Feedback
     	  float desiredAngle0 = this->_init_config_states[this->_controllerState][HIP_TO_LEFT_THIGH_JOINT];
     	  btVector3 footLocation = m_multiBody->getLink(RIGHT_FOOT).m_collider->getWorldTransform().getOrigin();
-    	  std::cout << "RIGHT foot origin? (" << footLocation.x() <<", " << footLocation.y() << ", " <<
-    			  footLocation.z() << ") "<< std::endl;
+    	  // std::cout << "RIGHT foot origin? (" << footLocation.x() <<", " << footLocation.y() << ", " <<
+    		// 	  footLocation.z() << ") "<< std::endl;
 
     	  btVector3 COMLocation = m_multiBody->getBasePos();
     	  // COMLocation.setX(-COMLocation.x());
-    	  std::cout << "TOURSO origin? (" << COMLocation.x() <<", " << COMLocation.y() << ", " <<
-    			  COMLocation.z() << ") "<< std::endl;
+    	  // std::cout << "TOURSO origin? (" << COMLocation.x() <<", " << COMLocation.y() << ", " <<
+    		// 	  COMLocation.z() << ") "<< std::endl;
 
-    	  float distanceFeedback = Cd*((footLocation.x() - COMLocation.x()) );
-    	  std::cout << "Distance feedback RIGHT FOOT" << distanceFeedback << std::endl;
-    	  float adjustedDesiredAngle = desiredAngle0 + distanceFeedback;
+    	  float distanceFeedback = -Cd*((footLocation.x() - COMLocation.x()) );
+    	  float velocityFeedback = Cv*(  -_baseVelocity.x());
+    	  // std::cout << "Distance feedback RIGHT FOOT" << distanceFeedback << std::endl;
+    	  float adjustedDesiredAngle = desiredAngle0 + distanceFeedback + velocityFeedback;
 
 		  btQuaternion angleQ =  m_multiBody->getParentToLocalRot(joint);
 		  float angleCurrent = angleQ.getAngle();
@@ -1000,10 +1038,10 @@ void MultiBodyVehicleSetup::stepSimulation(float deltaTime)
     	  // Need to change joint torque for HIP_TO_LEFT_THIGH_JOINT
 		  /*
     			  */
-		  m_multiBody->addJointTorque(HIP_TO_RIGHT_THIGH_JOINT, appliedTourque );
+		  m_multiBody->addJointTorque(HIP_TO_RIGHT_THIGH_JOINT, -appliedTourque );
 
 		  m_multiBody->addJointTorque(HIP_TO_LEFT_THIGH_JOINT,
-		      			  -this->_base_torque -
+		      			  this->_base_torque -
 		      			  m_multiBody->getJointTorque(HIP_TO_RIGHT_THIGH_JOINT));
       }
       else
@@ -1016,12 +1054,13 @@ void MultiBodyVehicleSetup::stepSimulation(float deltaTime)
 
     	  btVector3 COMLocation = m_multiBody->getBasePos();
 		  // COMLocation.setX(-COMLocation.x());
-		  std::cout << "TOURSO origin? (" << COMLocation.x() <<", " << COMLocation.y() << ", " <<
-	    			  COMLocation.z() << ") "<< std::endl;
+		  // std::cout << "TOURSO origin? (" << COMLocation.x() <<", " << COMLocation.y() << ", " <<
+	    	// 		  COMLocation.z() << ") "<< std::endl;
 
-		  float distanceFeedback = Cd*((footLocation.x() - COMLocation.x()) );
-		  std::cout << "Distance feedback LEFT FOOT" << distanceFeedback << std::endl;
-		  float adjustedDesiredAngle = desiredAngle0 + distanceFeedback;
+		  float distanceFeedback = -Cd*((footLocation.x() - COMLocation.x()) );
+		  float velocityFeedback = Cv*(  -_baseVelocity.x());
+		  // std::cout << "Distance feedback LEFT FOOT" << distanceFeedback << std::endl;
+		  float adjustedDesiredAngle = desiredAngle0 + distanceFeedback + velocityFeedback;
 
 
 		  btQuaternion angleQ =  m_multiBody->getParentToLocalRot(joint);
@@ -1045,10 +1084,10 @@ void MultiBodyVehicleSetup::stepSimulation(float deltaTime)
 		  {
 			  appliedTourque = -torqueLimit;
 		  }
-		  m_multiBody->addJointTorque(HIP_TO_LEFT_THIGH_JOINT, appliedTourque );
+		  m_multiBody->addJointTorque(HIP_TO_LEFT_THIGH_JOINT, -appliedTourque );
 
     	  m_multiBody->addJointTorque(HIP_TO_RIGHT_THIGH_JOINT,
-    			  -this->_base_torque -
+    			  this->_base_torque -
 				  m_multiBody->getJointTorque(HIP_TO_LEFT_THIGH_JOINT));
 
       }
