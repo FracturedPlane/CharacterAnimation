@@ -110,6 +110,7 @@ struct MultiBodyVehicleSetup : public CommonMultiBodySetup
     std::vector<float> _Kps;
 
     float _base_config;
+    float _base_torque;
     float _root_Kp;
     float _root_Kd;
 
