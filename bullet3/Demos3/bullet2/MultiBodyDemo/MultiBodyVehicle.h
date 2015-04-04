@@ -75,7 +75,8 @@ struct MultiBodyVehicleSetup : public CommonMultiBodySetup
     	START_WALKING_ON_RIGHT_FOOT,
     	STANDING_ON_RIGHT_FOOT,
     	START_WALKING_ON_LEFT_FOOT,
-    	STANDING_ON_LEFT_FOOT
+    	STANDING_ON_LEFT_FOOT,
+		TEST_STATE
     };
 
     enum jointIndex
