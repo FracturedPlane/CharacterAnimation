@@ -1,0 +1,39 @@
+
+\section{Framework}
+\label{sec:framework}
+
+I will be using a $\sim$16 link character with $\sim$38 degrees of freedom. 
+Using the Featherstone algorithm the links between rigid bodies are constructed in a hierarchical fashion. 
+The root link is the waist of the character. 
+To create a new link, a new rigid body is created and then it is added to the system by specifying the id of the parent rigidbody and the child rigidbody.
+
+To drive the character each joint has a function to set the current torque for a particular link.
+The link torques will be controlled using PD controllers.
+
+There are many steps and additions to the system that will eventually collimate in constructing a controller similar to the one used in the Generalized Biped work. 
+For example, adding gravity compensation to the PD controllers to make control for other systems simpler.
+
+The character will use an \emph{inverted pendulum} model to control its walking motions and foot placement. 
+This method is preferred because it is robust to changes in scale and has very clear parameters that can be used to constrain walking motions. This of course is on top of model giving a great framework for computing foot locations in space-time.
+
+
+Given the time left in the class the final system for this project may be planar motion.
+Sticking to planar motion will give me time to create a system to proved input motions to the controller. 
+The Generalized Biped is a great physics based controller but the system still needs a method to provide desired velocities for the character. 
+
+
+\begin{enumerate}
+	\item Constructing a character
+	\item Featherstone arrangement
+	\item Controlling joints
+	\item PD control on these joints
+	\item getting a statue
+	\item Using different solvers	
+\end{enumerate}
+
+Onto getting the character to walk
+
+\begin{enumerate}
+	\item Some math for generalize bipeds..
+	\item implementing them in BulletPhysics
+\end{enumerate}

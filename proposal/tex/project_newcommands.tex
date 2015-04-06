@@ -1,0 +1,15 @@
+% new commands
+
+% common formatting commands
+\newcommand{\todo}[1]{\textcolor{red}{Todo:#1}}
+\newcommand{\glen}[1]{\textcolor{blue}{Glen:#1}}
+\newcommand{\todocite}[1]{\textcolor{red}{[??#1??]}}
+
+%
+
+% math operations
+\DeclareMathOperator*{\argmin}{arg\,min}
+\newcommand{\specialcell}[2][c]{%
+  \begin{tabular}[#1]{@{}c@{}}#2\end{tabular}}
+
+\newcolumntype{M}{>{\centering\arraybackslash}m{\dimexpr.31\linewidth-1\tabcolsep}}
