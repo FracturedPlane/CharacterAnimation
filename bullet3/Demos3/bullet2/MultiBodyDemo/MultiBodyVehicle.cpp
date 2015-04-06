@@ -1054,6 +1054,7 @@ void MultiBodyVehicleSetup::stepSimulation(float deltaTime)
 		  float errorDifference =  (_Kps[HIP_TO_RIGHT_THIGH_JOINT] * (angleError2(angleCurrent, adjustedDesiredAngle))/deltaTime);
 		  // float errorDifference =  (kp * ((desiredAngle - angleCurrent))/deltaTime);
 		  // float errorDifference =  (kp * ((angleCurrent - desiredAngle))/deltaTime);
+		  apparently this should be different - derivative
 		  float appliedTourque = ((errorDifference) + (errorDerivative));// * m_multiBody->getLinkMass(joint);
 
 		  // std::cout << "Left hip applied torque is " << appliedTourque << std::endl;
