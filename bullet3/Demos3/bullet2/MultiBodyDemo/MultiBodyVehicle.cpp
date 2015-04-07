@@ -993,7 +993,7 @@ void MultiBodyVehicleSetup::stepSimulation(float deltaTime)
     	  float desiredAngle = this->_init_config_states[this->_controllerState][joint];
     	  btQuaternion angleQ =  m_multiBody->getParentToLocalRot(joint);
     	  float angleCurrent = angleQ.getAngle();
-    	  angleCurrent = m_multiBody->getJointPos(joint);
+    	  // angleCurrent = m_multiBody->getJointPos(joint);
     	  // std::cout << "Angle for joint " << joint << " is " << angleCurrent << std::endl;
     	  // btVector3 getAngularMomentum()
     	  // float errorDerivative =  kd * (((angleCurrent - desiredAngle)) - (this->config[joint] - desiredAngle)/deltaTime);
