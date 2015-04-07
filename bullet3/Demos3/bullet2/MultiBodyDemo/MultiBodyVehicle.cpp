@@ -964,7 +964,7 @@ void MultiBodyVehicleSetup::stepSimulation(float deltaTime)
       float _angleError = angleError2(rootdesiredAngle, _angleCurrent);
 	  float _errorDifference =  (this->_root_Kd * (_angleError)/deltaTime);
 	  // float _errorDifference =  (kp * ((desiredAngle - _angleCurrent))/deltaTime);
-	  float appliedTourque = ((_errorDifference) + (_errorDerivative));// * m_multiBody->getLinkMass(joint);
+	  float appliedTourque = ((_errorDifference) - (_errorDerivative));// * m_multiBody->getLinkMass(joint);
 	  if (appliedTourque > torqueLimit )
 	  {
 		  appliedTourque = torqueLimit;
@@ -1002,7 +1002,7 @@ void MultiBodyVehicleSetup::stepSimulation(float deltaTime)
     	  // float errorDifference =  (_Kps[joint] * (angleError2(angleCurrent, desiredAngle))/deltaTime);
     	  float errorDifference =  (_Kps[joint]  * ((desiredAngle - angleCurrent))/deltaTime);
     	  // float errorDifference =  (_Kps[joint] * ((angleCurrent - desiredAngle))/deltaTime);
-    	  float appliedTourque = ((errorDifference) + (errorDerivative));// * m_multiBody->getLinkMass(joint);
+    	  float appliedTourque = ((errorDifference) - (errorDerivative));// * m_multiBody->getLinkMass(joint);
     	  if (appliedTourque > torqueLimit )
     	  {
     		  appliedTourque = torqueLimit;
@@ -1029,8 +1029,10 @@ void MultiBodyVehicleSetup::stepSimulation(float deltaTime)
       { // Stance foot is LEFT FOOT
 
     	  // Balance Feedback
+    	  // TODO The swing leg should be controlled in world coordinate frame
     	  float desiredAngle0 = this->_init_config_states[this->_controllerState][HIP_TO_LEFT_THIGH_JOINT];
-    	  btVector3 footLocation = m_multiBody->getLink(RIGHT_FOOT).m_collider->getWorldTransform().getOrigin();
+    	  // TODO The foot location comparison is for the stance foot, not the swing foot.
+    	  btVector3 footLocation = m_multiBody->getLink(LEFT_FOOT).m_collider->getWorldTransform().getOrigin();
     	  // std::cout << "RIGHT foot origin? (" << footLocation.x() <<", " << footLocation.y() << ", " <<
     		// 	  footLocation.z() << ") "<< std::endl;
 
@@ -1039,7 +1041,7 @@ void MultiBodyVehicleSetup::stepSimulation(float deltaTime)
     	  // std::cout << "TOURSO origin? (" << COMLocation.x() <<", " << COMLocation.y() << ", " <<
     		// 	  COMLocation.z() << ") "<< std::endl;
 
-    	  float distanceFeedback = Cd*((footLocation.x() - COMLocation.x()) );
+    	  float distanceFeedback = Cd*-((footLocation.x() - COMLocation.x()));
     	  float velocityFeedback = Cv*(  -_baseVelocity.x());
     	  // std::cout << "Distance feedback RIGHT FOOT" << distanceFeedback << std::endl;
     	  float adjustedDesiredAngle = desiredAngle0 + distanceFeedback + velocityFeedback;
@@ -1054,8 +1056,7 @@ void MultiBodyVehicleSetup::stepSimulation(float deltaTime)
 		  float errorDifference =  (_Kps[HIP_TO_RIGHT_THIGH_JOINT] * (angleError2(angleCurrent, adjustedDesiredAngle))/deltaTime);
 		  // float errorDifference =  (kp * ((desiredAngle - angleCurrent))/deltaTime);
 		  // float errorDifference =  (kp * ((angleCurrent - desiredAngle))/deltaTime);
-		  apparently this should be different - derivative
-		  float appliedTourque = ((errorDifference) + (errorDerivative));// * m_multiBody->getLinkMass(joint);
+		  float appliedTourque = ((errorDifference) - (errorDerivative));// * m_multiBody->getLinkMass(joint);
 
 		  // std::cout << "Left hip applied torque is " << appliedTourque << std::endl;
 		  if (appliedTourque > torqueLimit )
@@ -1079,7 +1080,7 @@ void MultiBodyVehicleSetup::stepSimulation(float deltaTime)
       { // Stance foot is RIGHT foot
     	  float desiredAngle0 = this->_init_config_states[this->_controllerState][HIP_TO_RIGHT_THIGH_JOINT];
 
-    	  btVector3 footLocation = m_multiBody->getLink(LEFT_FOOT).m_collider->getWorldTransform().getOrigin();
+    	  btVector3 footLocation = m_multiBody->getLink(RIGHT_FOOT).m_collider->getWorldTransform().getOrigin();
     	      	  //std::cout << "Right foot origin? (" << footLocation.x() <<", " << footLocation.y() << ", " <<
     	      		//	  footLocation.z() << ") "<< std::endl;
 
@@ -1088,7 +1089,7 @@ void MultiBodyVehicleSetup::stepSimulation(float deltaTime)
 		  // std::cout << "TOURSO origin? (" << COMLocation.x() <<", " << COMLocation.y() << ", " <<
 	    	// 		  COMLocation.z() << ") "<< std::endl;
 
-		  float distanceFeedback = Cd*((footLocation.x() - COMLocation.x()) );
+		  float distanceFeedback = Cd*-((footLocation.x() - COMLocation.x()) );
 		  float velocityFeedback = Cv*(  -_baseVelocity.x());
 		  // std::cout << "Distance feedback LEFT FOOT" << distanceFeedback << std::endl;
 		  float adjustedDesiredAngle = desiredAngle0 + distanceFeedback + velocityFeedback;
@@ -1104,7 +1105,7 @@ void MultiBodyVehicleSetup::stepSimulation(float deltaTime)
 		  float errorDifference =  (_Kps[HIP_TO_RIGHT_THIGH_JOINT] * (angleError2(angleCurrent, adjustedDesiredAngle))/deltaTime);
 		  // float errorDifference =  (kp * ((desiredAngle - angleCurrent))/deltaTime);
 		  // float errorDifference =  (kp * ((angleCurrent - desiredAngle))/deltaTime);
-		  float appliedTourque = ((errorDifference) + (errorDerivative));// * m_multiBody->getLinkMass(joint);
+		  float appliedTourque = ((errorDifference) - (errorDerivative));// * m_multiBody->getLinkMass(joint);
 
 		  // std::cout << "Right hip applied torque is " << appliedTourque << std::endl;
 		  if (appliedTourque > torqueLimit )
