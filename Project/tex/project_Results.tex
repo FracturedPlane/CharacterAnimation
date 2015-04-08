@@ -3,7 +3,24 @@
 \section{Results}
 \label{sec:results}
 
-\begin{enumerate}
-	\item A nice standing controller example
-	\item some simple walking motion.
-\end{enumerate}
+
+	\noindent \textbf{Issues with PD controllers:}
+	Find the right settings for the PD controllers has been a difficult task. This can be linked to difficulties using the \Featherstone algorithm. Typically the torques on links are applied individually, this is not true in this version of the \Featherstone algorithm. No Link operates independently and any torque applied to a motor at a joint is applied to both links attached at the joint. This issue tends to propagate through the hierarchical chain of links. 
+	
+	\noindent \textbf{Use Dampening?}
+	I did try to reduce some issues by applying additional linear and angular dampening. Adding dampening only decreesed the effect of the issues, they are still present.
+	
+	\noindent \textbf{Joint angle specification:}
+	I found it was also difficult to work with joint angle specification in \bulletPhysics. Joint angles are constrained to be $0 \geq \theta \geq 2*\pi $. When a joint angle would wrap around the PD controller would switch its driving direction. This typically results in the character gaining a significant amount of energy.
+	
+	\noindent \textbf{Detecting foot to ground contact:}
+	Currently there are some issues with accurately detecting foot to ground contact. Ground contact is detected earlier than it should be. Investigation into the \bulletPhysics should lead to a solution to this issue.
+	
+	\noindent \textbf{Issues with defining the torso torque:}
+	Again, because torques are automatically applied to both links applying \torqueTorso is problematic. The method use in this work was to not specifically apply the torque to the torso but to instead only include it in stance leg torque computation.
+	
+	\noindent \textbf{A nice standing controller example:}
+	
+	
+	
+	\noindent \textbf{some simple walking motion:}
