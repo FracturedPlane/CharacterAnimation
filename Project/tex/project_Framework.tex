@@ -5,6 +5,7 @@
 This section describes the construction of the biped in the \bulletPhysics library. This includes the use of the Featherstone algorithm to construct the character. Next, I discuss the basic control for the biped character. Last, a description of the state machine and feedback used in \SIMBICON is given. 
 
 \begin{figure}[H]
+\centering
 	\includegraphics[width=0.2\linewidth]{../images/2D-Biped-crop.pdf} \\
 	\caption{\label{figure:2d-biped} 2D planar biped. Each link has $3$ degrees of freedom $\langle x, y, \theta \rangle$.}
 \end{figure}
@@ -31,7 +32,7 @@ The link torques will be controlled using Proportional Derivative (PD) controlle
 Each link is driven to a target angle using the formula $\tau = \Kp(\theta_{d}- \theta) - \Kd\dot{\theta} $.
 Each non-symmetric joint has different values for \Kp and \Kd.
 
-
+\begin{comment}
 \begin{enumerate}
 	\item Constructing a character
 	\item Featherstone arrangement
@@ -40,6 +41,7 @@ Each non-symmetric joint has different values for \Kp and \Kd.
 	\item getting a statue
 	\item Using different solvers	
 \end{enumerate}
+\end{comment}
 
 % Onto getting the character to walk
 
@@ -48,6 +50,7 @@ Each non-symmetric joint has different values for \Kp and \Kd.
 The character controller uses a state machine to choose the particular angles the biped should be driving toward. 
 There are 4 states and these states are symmetric with respect to the left and right legs of the character.
 
+\begin{comment}
 \begin{table}
 \centering
 	\begin{tabular}{ c | c | c | c | c }
@@ -62,11 +65,12 @@ There are 4 states and these states are symmetric with respect to the left and r
 	\end{tabular}
 	\caption{\label{table:controler-values}}
 \end{table}
+\end{comment}
 
-The joint angles for each of the state are listed in Table~\ref{table:controler-values}.
+%The joint angles for each of the state are listed in Table~\ref{table:controler-values}.
 The controller transitions between states for one of two reasons, a specific $\delta t$ has passed since the last transition or there is a new foot contact.
 
-\todo{description of the states, maybe as picutres}
+% \todo{description of the states, maybe as picutres}
 
 \subsection{Leg and Torso Control}
 
@@ -89,8 +93,9 @@ with distance (\distance) and velocity (\velocity) feedback.
 The distance \distance is calculated as the distance from the stance foot to the Centre of Motion (\COM), $\distance = -(\location{foot_{stance}} - \location{\COM})$.
 The velocity \velocity is simply the velocity of the \COM.
 
-
+\begin{comment}
 \begin{enumerate}
 	\item Some math for SIMBICON..
 	\item implementing them in BulletPhysics
 \end{enumerate}
+\end{comment}

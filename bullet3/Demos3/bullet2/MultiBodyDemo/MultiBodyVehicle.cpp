@@ -358,7 +358,7 @@ void MultiBodyVehicleSetup::transitionControllerStates()
 {
 	_lastTransitionFrameNum = this->_frameNum;
 	std::cout << "Transitioning between states, current state: " << this->_controllerState << std::endl;
-	if (0)
+	if (1)
 	{
 		if ( this->_controllerState == START_WALKING_ON_RIGHT_FOOT )
 		{
@@ -465,6 +465,8 @@ void MultiBodyVehicleSetup::initControllerStates()
 void MultiBodyVehicleSetup::initPhysics(GraphicsPhysicsBridge& gfxBridge)
 {
   int upAxis = 1;
+
+
 
   this->_frameNum = 0;
 
@@ -779,6 +781,7 @@ void MultiBodyVehicleSetup::initPhysics(GraphicsPhysicsBridge& gfxBridge)
     m_multiBody = createMultiBodyVehicle(modelInfo, gfxBridge);
     this->config.resize(m_multiBody->getNumLinks());
     m_multiBody->setUseGyroTerm(true);
+
   }    
   
 
@@ -824,8 +827,8 @@ void MultiBodyVehicleSetup::initPhysics(GraphicsPhysicsBridge& gfxBridge)
     	this->config[con] = m_multiBody->getParentToLocalRot(con).getAngle();
     	std::cout << "Initial Angle for joint " << con << " is " << this->config[con] << std::endl;
     }
-    m_multiBody->setLinearDamping(.10);
-    m_multiBody->setAngularDamping(.10);
+    m_multiBody->setLinearDamping(.50);
+    m_multiBody->setAngularDamping(.50);
     std::cout << "Linear dampening: " << m_multiBody->getLinearDamping() << std::endl;
     std::cout << "Angular dampening: " << m_multiBody->getAngularDamping() << std::endl;
     std::cout << "Gravity: (" << m_dynamicsWorld->getGravity().x() << ", " <<
@@ -888,7 +891,7 @@ void MultiBodyVehicleSetup::initPhysics(GraphicsPhysicsBridge& gfxBridge)
 */
 
 	btVector3 initialVelocity(-1.0,0,0);
-	m_multiBody->setBaseVel(initialVelocity+btVector3(-0.0,0,0));
+	m_multiBody->setBaseVel(initialVelocity+btVector3(-1.3,0,0));
 	for (size_t link=0; link < m_multiBody->getNumLinks(); link++)
 	{
 		// m_multiBody->getLink(link).m_mass;
@@ -995,7 +998,7 @@ void MultiBodyVehicleSetup::stepSimulation(float deltaTime)
 	  {
 		  appliedTourque = -torqueLimit;
 	  }
-	  // m_multiBody->addBaseTorque(btVector3(0,0, appliedTourque));
+	  m_multiBody->addBaseTorque(btVector3(0,0, appliedTourque));
 	  this->_base_torque = appliedTourque;
 	  this->_base_config = _angleCurrent;
 	  // std::cout << "desiredAngle: " << rootdesiredAngle << " currentAngle for joint " << "BASE" << " is " << _angleCurrent << " torque is " <<

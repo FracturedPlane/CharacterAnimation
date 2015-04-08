@@ -9,9 +9,10 @@ For this work I will focus on implementing~\cite{Yin07}.
 This controller uses a set of defined poses and a linear feedback model to simulate the walking gate of a biped.
 I want to implement this controller again using some new features in \bulletPhysics~\cite{coumans2013bullet}.
 The first new feature of interest is the Featherstone method for calculating articulated-body inertias~\cite{featherstone2014rigid}. 
-The second feature is a new Mixed Linear Complementarity Problem solver~\todocite{MLCP}. 
+The second feature is a new Mixed Linear Complementarity Problem solver. %~\todocite{MLCP}. 
 This solver does not have the performance of current solvers in \bulletPhysics but should converge to a stable solution faster.
 
+\begin{comment}
 \begin{enumerate}
 	\item {Character simulation is a complex problem}
 	\item {Some solution exist for this problem that are very robust}
@@ -19,3 +20,4 @@ This solver does not have the performance of current solvers in \bulletPhysics b
 	\item {This controller is supposed to model the character animation problem in a general way.}
 	\item {I want to implement this controller again using some new features in \bulletPhysics}
 \end{enumerate}
+\end{comment}

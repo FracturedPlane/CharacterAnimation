@@ -2,10 +2,11 @@
 \section{Discussion}
 \label{sec:Conclusion}
 
-\begin{enumerate}
-	\item Character animation is awesome
-	\item Was \bulletPhysics a good choice?
-	\item Did any of the solvers help?
-	\item Different joint angle specification to help solve issues
-	\item Anything else learned?
-\end{enumerate}
+	\noindent \textbf{Was \bulletPhysics a good choice?}
+	
+	\bulletPhysics has been a great framework to use for this work. There are some design decision I did not expect. However, I think the numerical stability and use of the \Featherstone algorithm are important advantages.
+
+	\noindent \textbf{Different joint angle specification to help solve issues}
+	
+	I have found another method in \bulletPhysics to calculate relative joint angles that will hopefully help me eliminate some of the joint angle wrap around issues I have been having.
+	
