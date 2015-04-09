@@ -3,11 +3,11 @@
 \label{sec:Intro}
 
 
-Physics-based character simulation is a complex due to the complexities in human motion.
-Some solution exist that animate characters very well and are very robust~\cite{Yin07,Coros09}.
-For this work I will focus on implementing~\cite{Yin07}.
-This controller uses a set of defined poses and a linear feedback model to simulate the walking gate of a biped.
-I want to implement this controller again using some new features in \bulletPhysics~\cite{coumans2013bullet}.
+Physics-based character simulation is difficult due to the complexities in human motion.
+Some solutions exist that animate characters very well and are very robust~\cite{Yin07,Coros09}.
+For this work I will focus on implementing SIMBICON from~\cite{Yin07}.
+SIMBICON uses a set of defined poses and a linear feedback model to simulate the walking gait of a biped.
+I want to implement this controller using some new features in \bulletPhysics~\cite{coumans2013bullet}.
 The first new feature of interest is the Featherstone method for calculating articulated-body inertias~\cite{featherstone2014rigid}. 
 The second feature is a new Mixed Linear Complementarity Problem solver. %~\todocite{MLCP}. 
 This solver does not have the performance of current solvers in \bulletPhysics but should converge to a stable solution faster.
